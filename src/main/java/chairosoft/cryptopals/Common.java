@@ -40,7 +40,21 @@ public final class Common {
     
     public static String parseFromHex(String hexText) {
         byte[] data = fromHex(hexText);
-        return new String(data, COMMON_CHARSET);
+        StringBuilder sb = new StringBuilder(data.length);
+        for (int b : data) {
+            char c = (char) b;
+            if (c == '\\') {
+                sb.append("\\\\");
+            }
+            else if (c < ' ' || b > 126) {
+                String s = String.format("\\x%02x", b);
+                sb.append(s);
+            }
+            else {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
     }
     
 }
