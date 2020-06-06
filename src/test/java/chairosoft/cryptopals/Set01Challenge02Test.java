@@ -24,8 +24,8 @@ public class Set01Challenge02Test {
         String xText = parseFromHex(x);
         String yText = parseFromHex(y);
         String outText = parseFromHex(actualOutput);
-        System.out.printf("S1C2 x:   %s\n", xText);
-        System.out.printf("S1C2 y:   %s\n", yText);
+        System.out.printf("S1C2   x: %s\n", xText);
+        System.out.printf("S1C2   y: %s\n", yText);
         System.out.printf("S1C2 out: %s\n", outText);
     }
 }
