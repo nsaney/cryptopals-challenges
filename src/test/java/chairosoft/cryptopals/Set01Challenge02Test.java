@@ -3,14 +3,13 @@ package chairosoft.cryptopals;
 import org.junit.Test;
 
 import static chairosoft.cryptopals.Common.*;
-import static chairosoft.cryptopals.TestUtils.getStdOut;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
 /**
  * https://cryptopals.com/sets/1/challenges/2
  */
-public class Set01Challenge02Test {
+public class Set01Challenge02Test extends TestBase {
     
     ////// Instance Methods - Tests //////
     @Test

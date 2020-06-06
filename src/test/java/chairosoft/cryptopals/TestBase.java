@@ -1,12 +1,23 @@
 package chairosoft.cryptopals;
 
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
-public final class TestUtils {
+public abstract class TestBase {
     
-    ////// Constructor //////
-    private TestUtils() { throw new UnsupportedOperationException(); }
+    ////// Setup/Teardown Methods //////
+    @BeforeClass
+    public static void beforeClass() throws Exception {
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+    }
+    
+    @AfterClass
+    public static void afterClass() throws Exception {
+        System.out.println("________________________________________________________________________________");
+    }
     
     
     ////// Static Inner Classes //////
