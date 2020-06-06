@@ -2,8 +2,7 @@ package chairosoft.cryptopals;
 
 import org.junit.Test;
 
-import static chairosoft.cryptopals.Common.COMMON_CHARSET;
-import static chairosoft.cryptopals.Common.fromHex;
+import static chairosoft.cryptopals.Common.*;
 import static chairosoft.cryptopals.TestUtils.getStdOut;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -21,8 +20,7 @@ public class Set01Challenge01Test {
         byte[] actualOutputBytes = getStdOut(Set01Challenge01::main, input);
         String actualOutput = new String(actualOutputBytes, COMMON_CHARSET);
         assertThat(actualOutput, equalTo(expectedOutput));
-        byte[] inputData = fromHex(input);
-        String inputText = new String(inputData, COMMON_CHARSET);
+        String inputText = parseFromHex(input);
         System.out.printf("S1C1 input: %s\n", inputText);
     }
 }

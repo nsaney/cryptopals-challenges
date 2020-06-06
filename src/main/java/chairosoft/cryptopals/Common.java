@@ -38,4 +38,9 @@ public final class Common {
         return sb.toString();
     }
     
+    public static String parseFromHex(String hexText) {
+        byte[] data = fromHex(hexText);
+        return new String(data, COMMON_CHARSET);
+    }
+    
 }
