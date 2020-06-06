@@ -41,18 +41,33 @@ public final class Common {
     public static String parseFromHex(String hexText) {
         byte[] data = fromHex(hexText);
         StringBuilder sb = new StringBuilder(data.length);
+        boolean inSpecialMode = false;
         for (int b : data) {
             char c = (char) b;
-            if (c == '\\') {
-                sb.append("\\\\");
-            }
-            else if (c < ' ' || b > 126) {
-                String s = String.format("\\x%02x", b);
+            boolean isSpecial = (c < ' ' || b > 126);
+            boolean changeMode = isSpecial != inSpecialMode;
+            inSpecialMode = isSpecial;
+            if (inSpecialMode) {
+                if (changeMode) {
+                    sb.append("\\x[");
+                }
+                String s = String.format("%02x", b);
                 sb.append(s);
             }
             else {
-                sb.append(c);
+                if (changeMode) {
+                    sb.append("]");
+                }
+                if (c == '\\') {
+                    sb.append("\\\\");
+                }
+                else {
+                    sb.append(c);
+                }
             }
+        }
+        if (inSpecialMode) {
+            sb.append("]");
         }
         return sb.toString();
     }
