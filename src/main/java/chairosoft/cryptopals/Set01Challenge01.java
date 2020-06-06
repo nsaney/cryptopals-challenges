@@ -1,7 +1,5 @@
 package chairosoft.cryptopals;
 
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
 import java.util.Base64;
 
 /**
