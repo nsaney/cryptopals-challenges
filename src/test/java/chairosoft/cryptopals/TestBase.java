@@ -31,14 +31,18 @@ public abstract class TestBase {
     public static byte[] getStdOut(MainMethod mainMethod, String... args) throws Exception {
         PrintStream originalOut = System.out;
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] result;
         try (PrintStream tempOut = new PrintStream(baos)) {
             System.setOut(tempOut);
             mainMethod.doMain(args);
         }
         finally {
+            result = baos.toByteArray();
             System.setOut(originalOut);
+            System.out.write(result);
+            System.out.println();
         }
-        return baos.toByteArray();
+        return result;
     }
     
 }
