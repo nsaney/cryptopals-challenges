@@ -19,6 +19,12 @@ public class Set01Challenge02 {
         System.out.print(dataHex);
     }
     
+    
+    ////// Static Methods //////
+    public static byte xor(byte xVal, byte yVal) {
+        return (byte)((xVal ^ yVal) & 0xff);
+    }
+    
     public static byte[] xor(byte[] x, byte[] y) {
         int maxLen = Math.max(x.length, y.length);
         byte[] xAdjusted = x.length == maxLen ? x : Arrays.copyOfRange(x, 0, maxLen);
@@ -27,7 +33,7 @@ public class Set01Challenge02 {
         for (int i = 0; i < maxLen; ++i) {
             byte xVal = xAdjusted[i];
             byte yVal = yAdjusted[i];
-            result[i] = (byte)((xVal ^ yVal) & 0xff);
+            result[i] = xor(xVal, yVal);
         }
         return result;
     }
