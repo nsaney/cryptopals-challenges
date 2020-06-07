@@ -40,24 +40,29 @@ public final class Common {
     
     public static String parseFromHex(String hexText) {
         byte[] data = fromHex(hexText);
+        return toDisplayableText(data);
+    }
+    
+    public static String toDisplayableText(byte[] data) {
         StringBuilder sb = new StringBuilder(data.length);
         boolean inSpecialMode = false;
-        for (int b : data) {
-            char c = (char) b;
-            boolean isSpecial = (c < ' ' || b > 126);
+        for (byte b : data) {
+            int code = b & 0xff;
+            boolean isSpecial = !(' ' <= code && code < 127);
             boolean changeMode = isSpecial != inSpecialMode;
             inSpecialMode = isSpecial;
             if (inSpecialMode) {
                 if (changeMode) {
                     sb.append("\\x[");
                 }
-                String s = String.format("%02x", b);
+                String s = String.format("%02x", code);
                 sb.append(s);
             }
             else {
                 if (changeMode) {
                     sb.append("]");
                 }
+                char c = (char) code;
                 if (c == '\\') {
                     sb.append("\\\\");
                 }
