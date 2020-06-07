@@ -43,12 +43,20 @@ public final class Common {
         return toDisplayableText(data);
     }
     
-    public static String toDisplayableText(byte[] data) {
+    public static boolean isDisplayableChar(int code) {
+        return ' ' <= code && code < 127;
+    }
+    
+    public static boolean isSpecialChar(int code) {
+        return !isDisplayableChar(code);
+    }
+    
+    public static String toDisplayableText(byte... data) {
         StringBuilder sb = new StringBuilder(data.length);
         boolean inSpecialMode = false;
         for (byte b : data) {
             int code = b & 0xff;
-            boolean isSpecial = !(' ' <= code && code < 127);
+            boolean isSpecial = isSpecialChar(code);
             boolean changeMode = isSpecial != inSpecialMode;
             inSpecialMode = isSpecial;
             if (inSpecialMode) {
