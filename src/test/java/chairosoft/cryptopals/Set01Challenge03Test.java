@@ -21,7 +21,7 @@ public class Set01Challenge03Test extends TestBase {
         byte[] actualResultBytes = getStdOut(Set01Challenge03::main, input);
         String actualResult = new String(actualResultBytes, COMMON_CHARSET);
         assertThat(actualResult, startsWith(expectedResultPrefix));
-        long actualResultLineCount = actualResult.codePoints().filter(c -> c == '\n').count() + 1;
+        long actualResultLineCount = actualResult.codePoints().filter(c -> c == '\n').count();
         assertThat("Line Count", actualResultLineCount, equalTo(expectedResultLineCount));  
     }
     
