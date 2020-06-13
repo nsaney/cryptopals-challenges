@@ -30,7 +30,10 @@ public class Set01Challenge03 {
         return cipherResults
             .stream()
             .filter(r -> hasOnlyDisplayableChars(r.result))
-            .max(Comparator.comparing(r -> r.getFrequencyTable().getFrequency((byte) ' ')))
+            .map(r -> new AbstractMap.SimpleEntry<>(r, r.getFrequencyTable().getFrequency((byte)' ')))
+            .filter(e -> e.getValue() > 0)
+            .max(Map.Entry.comparingByValue())
+            .map(Map.Entry::getKey)
             .orElse(null);
     }
     
