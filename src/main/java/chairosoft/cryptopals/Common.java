@@ -3,6 +3,11 @@ package chairosoft.cryptopals;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public final class Common {
     
@@ -115,6 +120,139 @@ public final class Common {
             sb.append("]");
         }
         return sb.toString();
+    }
+    
+    public static int blockDecompositionSize(int totalSize, int blockCount, int blockIndex) {
+        int baseBlockSize = totalSize / blockCount;
+        int numberOfIndicesWithOneExtra = totalSize % blockCount;
+        boolean indexHasOneExtra = blockIndex < numberOfIndicesWithOneExtra;
+        return baseBlockSize + (indexHasOneExtra ? 1 : 0);
+    }
+    
+    
+    ////// Static Inner Classes //////
+    public static abstract class CipherResult<T> {
+        
+        //// Instance Fields ////
+        public final T key;
+        public final byte[] result;
+        
+        //// Constructor ////
+        public CipherResult(byte[] input, T _key) {
+            this.key = _key;
+            this.result = this.getResultFromInput(input);
+        }
+        
+        //// Instance Methods - Abstract ////
+        public abstract byte[] getResultFromInput(byte[] input);
+        public abstract String getKeyText();
+        
+        //// Instance Methods - Concrete ////
+        @Override
+        public String toString() {
+            String keyText = this.getKeyText();
+            String resultText = toDisplayableText(this.result);
+            return String.format("[%s]: %s", keyText, resultText);
+        }
+        
+        public FrequencyTable<Byte> getFrequencyTable() {
+            FrequencyTable<Byte> frequencyTable = new FrequencyTable<>();
+            for (byte b : this.result) {
+                frequencyTable.incrementFrequency(b);
+            }
+            return frequencyTable;
+        }
+        
+    }
+    
+    public static class Frequency<T> implements Comparable<Frequency<T>> {
+        
+        //// Instance Fields ////
+        public final T key;
+        
+        //// Instance Properties ////
+        private int count = 0;
+        public int getCount() {
+            return this.count;
+        }
+        public int incrementCount() {
+            return ++this.count;
+        }
+        
+        //// Constructor ////
+        public Frequency(T _key) {
+            this.key = _key;
+        }
+        
+        //// Instance Methods ////
+        @Override
+        public int compareTo(Frequency<T> that) {
+            return -1 * Integer.compare(this.count, that.count);
+        }
+        
+        @Override
+        public String toString() {
+            return this.toString(Objects::toString);
+        }
+        
+        public String toString(Function<T, String> keyToStringFn) {
+            String keyText = keyToStringFn.apply(this.key);
+            return String.format("%s:%s", keyText, this.count);
+        }
+        
+    }
+    
+    public static class FrequencyTable<T> {
+        
+        //// Instance Fields ////
+        private final Map<T, Frequency<T>> innerMap = new HashMap<>();
+        
+        //// Instance Methods ////
+        public int getFrequency(T obj) {
+            if (obj == null) {
+                return 0;
+            }
+            Frequency<T> frequency = this.innerMap.get(obj);
+            if (frequency == null) {
+                return 0;
+            }
+            return frequency.getCount();
+        }
+        
+        public int incrementFrequency(T obj) {
+            if (obj == null) {
+                return 0;
+            }
+            Frequency<T> frequency = this.innerMap.computeIfAbsent(obj, Frequency::new);
+            return frequency.incrementCount();
+        }
+        
+        @SafeVarargs
+        public final void incrementFrequencies(T... objects) {
+            for (T obj : objects) {
+                this.incrementFrequency(obj);
+            }
+        }
+        
+        @Override
+        public String toString() {
+            return this.toString(Objects::toString);
+        }
+        
+        public String toString(Function<T, String> keyToStringFn) {
+            return this
+                .innerMap
+                .values()
+                .stream()
+                .sorted()
+                .map(frequencyToStringFn(keyToStringFn))
+                .collect(Collectors.joining("; ", "[", "]"));
+        }
+        
+        public Function<Frequency<T>, String> frequencyToStringFn(Function<T, String> keyToStringFn) {
+            return f -> f.toString(keyToStringFn);
+        }
+        
     }
     
 }
