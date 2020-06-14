@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import static chairosoft.cryptopals.Common.*;
 
 /**
- * https://cryptopals.com/sets/1/challenges/4
+ * https://cryptopals.com/sets/1/challenges/6
  */
 public class Set01Challenge06 {
     
