@@ -8,7 +8,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
 /**
- * https://cryptopals.com/sets/1/challenges/1
+ * https://cryptopals.com/sets/1/challenges/5
  */
 public class Set01Challenge05Test extends TestBase {
     

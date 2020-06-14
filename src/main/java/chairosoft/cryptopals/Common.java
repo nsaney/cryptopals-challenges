@@ -47,11 +47,31 @@ public final class Common {
         return toDisplayableText(data);
     }
     
-    public static byte[] fromBase64(String base64Text) {
-        return Base64.getDecoder().decode(base64Text);
+    public static Base64.Decoder decoder(boolean useMime) {
+        return useMime ? Base64.getMimeDecoder() : Base64.getDecoder();
     }
     
-    public static String toBase64(byte[] data) {
+    public static byte[] fromBase64(byte[] base64Data) {
+        return fromBase64(base64Data, false);
+    }
+    
+    public static byte[] fromBase64(byte[] base64Data, boolean useMime) {
+        return decoder(useMime).decode(base64Data);
+    }
+    
+    public static byte[] fromBase64Text(String base64Text) {
+        return fromBase64Text(base64Text, false);
+    }
+    
+    public static byte[] fromBase64Text(String base64Text, boolean useMime) {
+        return decoder(useMime).decode(base64Text);
+    }
+    
+    public static byte[] toBase64(byte[] data) {
+        return Base64.getEncoder().encode(data);
+    }
+    
+    public static String toBase64Text(byte[] data) {
         return Base64.getEncoder().encodeToString(data);
     }
     

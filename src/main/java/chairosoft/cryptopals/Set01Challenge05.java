@@ -4,7 +4,7 @@ import static chairosoft.cryptopals.Common.COMMON_CHARSET;
 import static chairosoft.cryptopals.Common.toHex;
 
 /**
- * https://cryptopals.com/sets/1/challenges/1
+ * https://cryptopals.com/sets/1/challenges/6
  */
 public class Set01Challenge05 {
     
