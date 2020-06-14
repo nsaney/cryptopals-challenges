@@ -15,7 +15,7 @@ public class Set01Challenge06Test extends TestBase {
     ////// Instance Methods - Tests //////
     @Test
     public void doTest() throws Exception {
-        //
+        // test hamming
         String hammingX = "this is a test";
         String hammingY = "wokka wokka!!!";
         int expectedHammingDistance = 37;
@@ -25,11 +25,13 @@ public class Set01Challenge06Test extends TestBase {
         );
         System.out.println("Hamming Distance Check: " + actualHammingDistance);
         assertThat("Hamming Distance", actualHammingDistance, equalTo(expectedHammingDistance));
-        
+        // test break repeating xor
         String inputFile = "src/test/resources/set01/6.txt";
-        String expectedResultPrefix = "??unknown??";
-        long expectedResultLineCount = 1;
-        byte[] actualResultBytes = getStdOut(Set01Challenge06::main, inputFile);
+        String keySizeMin = "2";
+        String keySizeMax = "40";
+        String expectedResultPrefix = "[Terminator X: Bring the noise]";
+        long expectedResultLineCount = 79;
+        byte[] actualResultBytes = getStdOut(Set01Challenge06::main, inputFile, keySizeMin, keySizeMax);
         String actualResult = new String(actualResultBytes, COMMON_CHARSET);
         assertThat(actualResult, startsWith(expectedResultPrefix));
         long actualResultLineCount = actualResult.codePoints().filter(c -> c == '\n').count();
