@@ -13,18 +13,22 @@ public class Set01Challenge03 {
     ////// Main Method //////
     public static void main(String... args) throws Exception {
         byte[] input = fromHex(args[0]);
-        SingleCharXorCipherResult result = getEnglishCleartext(input);
+        SingleCharXorCipherResult result = getMostLikelyEnglishCleartext(input);
         System.out.println(result);
     }
     
     
     ////// Static Methods //////
-    public static SingleCharXorCipherResult getEnglishCleartext(byte[] singleCharXorCipher) {
+    public static SingleCharXorCipherResult getMostLikelyEnglishCleartext(byte[] singleCharXorCipher) {
         List<SingleCharXorCipherResult> cipherResults = new ArrayList<>();
         for (byte b = Byte.MIN_VALUE; b < Byte.MAX_VALUE; ++b) {
             SingleCharXorCipherResult cipherResult = new SingleCharXorCipherResult(singleCharXorCipher, b);
             cipherResults.add(cipherResult);
         }
+        return getMostLikelyEnglishCleartext(cipherResults);
+    }
+    
+    public static <T extends CipherResult<?>> T getMostLikelyEnglishCleartext(List<T> cipherResults) {
         return cipherResults
             .stream()
             .filter(r -> hasOnlyEnglishChars(r.result))

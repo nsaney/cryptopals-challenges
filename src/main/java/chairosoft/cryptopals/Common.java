@@ -81,7 +81,7 @@ public final class Common {
     }
     
     public static boolean isDisplayableChar(int code) {
-        return ' ' <= code && code < 127;
+        return code == '\t' || code == '\r' || code == '\n' || (' ' <= code && code < 127);
     }
     
     public static boolean isSpecialChar(int code) {

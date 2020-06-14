@@ -20,10 +20,10 @@ public class Set01Challenge04 {
         List<byte[]> dataLines = textLines.stream().map(Common::fromHex).collect(Collectors.toList());
         List<SingleCharXorCipherResult> cipherResults = dataLines
             .stream()
-            .map(Set01Challenge03::getEnglishCleartext)
+            .map(Set01Challenge03::getMostLikelyEnglishCleartext)
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
-        cipherResults.forEach(System.out::println);
+        cipherResults.forEach(System.out::print);
     }
     
 }
