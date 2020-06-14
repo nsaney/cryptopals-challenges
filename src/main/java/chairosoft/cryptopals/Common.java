@@ -33,6 +33,9 @@ public final class Common {
         StringBuilder sb = new StringBuilder(textLen);
         for (byte valueData : data) {
             String valueText = Integer.toString(valueData, 16);
+            if (valueData < 16) {
+                sb.append("0");
+            }
             sb.append(valueText);
         }
         return sb.toString();
