@@ -2,6 +2,7 @@ package chairosoft.cryptopals;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 public final class Common {
     
@@ -44,6 +45,14 @@ public final class Common {
     public static String parseFromHex(String hexText) {
         byte[] data = fromHex(hexText);
         return toDisplayableText(data);
+    }
+    
+    public static byte[] fromBase64(String base64Text) {
+        return Base64.getDecoder().decode(base64Text);
+    }
+    
+    public static String toBase64(byte[] data) {
+        return Base64.getEncoder().encodeToString(data);
     }
     
     public static boolean isDisplayableChar(int code) {
