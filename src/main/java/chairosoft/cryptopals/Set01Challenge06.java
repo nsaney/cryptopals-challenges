@@ -103,7 +103,7 @@ public class Set01Challenge06 {
         
         //// Constructor ////
         public RepeatingXorCipherResult(byte[] input, byte[] _key) {
-            super(input, Arrays.copyOf(_key, _key.length));
+            super(input, _key.clone());
         }
         
         //// Instance Methods ////
