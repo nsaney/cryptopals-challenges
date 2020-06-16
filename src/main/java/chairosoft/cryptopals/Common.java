@@ -23,6 +23,10 @@ public final class Common {
     
     
     ////// Static Methods - Data Formats and Display //////
+    public static int maxIndex(byte[] data, int off, int len) {
+        return Math.min(data.length, off + len);
+    }
+    
     public static byte[] fromHex(String hexText) {
         int textLen = hexText.length();
         int dataLen = textLen / 2;
@@ -36,11 +40,17 @@ public final class Common {
         return data;
     }
     
-    public static String toHex(byte[] data) {
-        int dataLen = data.length;
+    public static String toHex(byte... data) {
+        return toHex(data, 0, data.length);
+    }
+    
+    public static String toHex(byte[] data, int off, int len) {
+        int max = maxIndex(data, off, len);
+        int dataLen = max - off;
         int textLen = dataLen * 2;
         StringBuilder sb = new StringBuilder(textLen);
-        for (byte valueData : data) {
+        for (int i = off; i < max; ++i) {
+            byte valueData = data[i];
             int valueUnsigned = valueData & 0xff;
             String valueText = Integer.toString(valueUnsigned, 16);
             if (valueUnsigned < 16) {
@@ -97,9 +107,9 @@ public final class Common {
     }
     
     public static String toDisplayableText(byte[] data, int off, int len) {
-        StringBuilder sb = new StringBuilder(data.length);
+        int max = maxIndex(data, off, len);
+        StringBuilder sb = new StringBuilder(max);
         boolean inSpecialMode = false;
-        int max = Math.min(data.length, off + len);
         for (int i = off; i < max; ++i) {
             byte b = data[i];
             int code = b & 0xff;
