@@ -244,8 +244,8 @@ public final class Common {
         SecretKey secretKey = new SecretKeySpec(key, algorithmName);
         cipher.init(cipherMode, secretKey);
         byte[] result = out == null ? new byte[len] : out;
-        outOff = out == null ? 0 : outOff;
-        cipher.doFinal(data, dataOff, len, out, outOff);
+        int resultOff = out == null ? 0 : outOff;
+        cipher.doFinal(data, dataOff, len, result, resultOff);
         return result;
     }
     
