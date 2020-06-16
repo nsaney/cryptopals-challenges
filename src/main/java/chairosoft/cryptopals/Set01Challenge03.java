@@ -3,7 +3,6 @@ package chairosoft.cryptopals;
 import java.util.*;
 
 import static chairosoft.cryptopals.Common.*;
-import static chairosoft.cryptopals.Set01Challenge02.xor;
 
 /**
  * https://cryptopals.com/sets/1/challenges/3

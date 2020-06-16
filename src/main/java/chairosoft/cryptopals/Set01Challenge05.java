@@ -1,7 +1,6 @@
 package chairosoft.cryptopals;
 
-import static chairosoft.cryptopals.Common.COMMON_CHARSET;
-import static chairosoft.cryptopals.Common.toHex;
+import static chairosoft.cryptopals.Common.*;
 
 /**
  * https://cryptopals.com/sets/1/challenges/5
@@ -27,7 +26,7 @@ public class Set01Challenge05 {
             }
             byte dataChar = data[i];
             byte xorChar = key[j];
-            result[i] = Set01Challenge02.xor(dataChar, xorChar);
+            result[i] = xor(dataChar, xorChar);
         }
         return result;
     }

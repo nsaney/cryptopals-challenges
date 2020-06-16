@@ -168,6 +168,25 @@ public final class Common {
     }
     
     ////// Static Methods - Crypto //////
+    public static byte xor(byte xVal, byte yVal) {
+        return (byte)((xVal ^ yVal) & 0xff);
+    }
+    
+    public static byte[] xor(byte[] x, byte[] y) {
+        int minLen = Math.min(x.length, y.length);
+        return xor(x, 0, y, 0, minLen);
+    }
+    
+    public static byte[] xor(byte[] x, int xOff, byte[] y, int yOff, int len) {
+        byte[] result = new byte[len];
+        for (int i = xOff, j = yOff; i < len; ++i, ++j) {
+            byte xi = x[i];
+            byte yi = y[i];
+            result[i] = xor(xi, yi);
+        }
+        return result;
+    }
+    
     public static byte[] applyCipher(
         String algorithmName,
         String algorithmMode,
@@ -178,11 +197,26 @@ public final class Common {
     )
         throws GeneralSecurityException
     {
+        return applyCipher(algorithmName, algorithmMode, paddingScheme, cipherMode, key, data, 0, data.length);
+    }
+    
+    public static byte[] applyCipher(
+        String algorithmName,
+        String algorithmMode,
+        String paddingScheme,
+        int cipherMode,
+        byte[] key,
+        byte[] data,
+        int off,
+        int len
+    )
+        throws GeneralSecurityException
+    {
         String transformation = algorithmName + "/" + algorithmMode + "/" + paddingScheme;
         Cipher cipher = Cipher.getInstance(transformation);
         SecretKey secretKey = new SecretKeySpec(key, algorithmName);
         cipher.init(cipherMode, secretKey);
-        return cipher.doFinal(data);
+        return cipher.doFinal(data, off, len);
     }
     
     
