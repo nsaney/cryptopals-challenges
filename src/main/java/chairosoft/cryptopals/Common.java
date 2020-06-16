@@ -173,16 +173,30 @@ public final class Common {
     }
     
     public static byte[] xor(byte[] x, byte[] y) {
-        int minLen = Math.min(x.length, y.length);
-        return xor(x, 0, y, 0, minLen);
+        return xor(x, 0, y, 0, null, -1, x.length);
     }
     
-    public static byte[] xor(byte[] x, int xOff, byte[] y, int yOff, int len) {
-        byte[] result = new byte[len];
-        for (int i = xOff, j = yOff; i < len; ++i, ++j) {
+    public static byte[] xor(byte[] x, int xOff, byte[] y, int yOff, byte[] out, int outOff, int len) {
+        int xMax = maxIndex(x, xOff, len);
+        int xLen = xMax - xOff;
+        int yMax = maxIndex(y, yOff, len);
+        int yLen = yMax - yOff;
+        int outMax = out == null ? xLen : maxIndex(out, outOff, len);
+        int outLen = out == null ? xLen : (outMax - outOff);
+        if (xLen != yLen || xLen != outLen) {
+            throw new ArrayIndexOutOfBoundsException(String.format(
+                "Mismatched lengths: x[%s] %s:%s => %s || y[%s] %s:%s => %s || out[%s] %s:%s => %s",
+                x.length, xOff, xMax, xLen,
+                y.length, yOff, yMax, yLen,
+                (out == null) ? null : out.length, outOff, outMax, outLen
+            ));
+        }
+        byte[] result = out == null ? new byte[outLen] : out;
+        if (out == null) { outOff = 0; }
+        for (int i = xOff, j = yOff, k = outOff; k < outMax; ++i, ++j, ++k) {
             byte xi = x[i];
-            byte yi = y[i];
-            result[i] = xor(xi, yi);
+            byte yj = y[j];
+            result[k] = xor(xi, yj);
         }
         return result;
     }
