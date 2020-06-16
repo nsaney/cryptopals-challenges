@@ -1,7 +1,10 @@
 package chairosoft.cryptopals;
 
+import javax.crypto.*;
+import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.security.*;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,7 +22,7 @@ public final class Common {
     public static final Charset COMMON_CHARSET = StandardCharsets.UTF_8;
     
     
-    ////// Static Methods //////
+    ////// Static Methods - Data Formats and Display //////
     public static byte[] fromHex(String hexText) {
         int textLen = hexText.length();
         int dataLen = textLen / 2;
@@ -133,6 +136,24 @@ public final class Common {
         int numberOfIndicesWithOneExtra = totalSize % blockCount;
         boolean indexHasOneExtra = blockIndex < numberOfIndicesWithOneExtra;
         return baseBlockSize + (indexHasOneExtra ? 1 : 0);
+    }
+    
+    ////// Static Methods - Crypto //////
+    public static byte[] applyCipher(
+        String algorithmName,
+        String algorithmMode,
+        String paddingScheme,
+        int cipherMode,
+        byte[] key,
+        byte[] data
+    )
+        throws GeneralSecurityException
+    {
+        String transformation = algorithmName + "/" + algorithmMode + "/" + paddingScheme;
+        Cipher cipher = Cipher.getInstance(transformation);
+        SecretKey secretKey = new SecretKeySpec(key, algorithmName);
+        cipher.init(cipherMode, secretKey);
+        return cipher.doFinal(data);
     }
     
     
