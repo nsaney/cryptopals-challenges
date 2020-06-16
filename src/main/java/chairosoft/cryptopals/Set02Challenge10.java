@@ -3,6 +3,7 @@ package chairosoft.cryptopals;
 import javax.crypto.Cipher;
 
 import java.security.GeneralSecurityException;
+import java.util.Arrays;
 
 import static chairosoft.cryptopals.Common.*;
 
@@ -17,8 +18,8 @@ public class Set02Challenge10 {
         byte[] key = fromUtf8(args[1]);
         byte[] iv = fromUtf8(args[2]);
         byte[] output = decryptAesCbc(data, key, iv);
-        System.out.write(output);
-        System.out.println();
+        String outputText = toDisplayableText(output);
+        System.out.println(outputText);
     }
     
     
@@ -69,7 +70,29 @@ public class Set02Challenge10 {
             int previousOffset = (i == 0) ? 0 : (i - blockSize);
             xor(currentDecryptedBlock, 0, previousData, previousOffset, result, i, blockSize);
         }
-        return result;
+        return removePkcs7(blockSize, result);
+    }
+    
+    public static byte[] removePkcs7(int blockSize, byte[] data) {
+        int padding = determinePkcs7Padding(blockSize, data);
+        return Arrays.copyOf(data, data.length - padding);
+    }
+    
+    public static int determinePkcs7Padding(int blockSize, byte[] data) {
+        for (byte p = 1; p < blockSize; ++p) {
+            boolean hasCurrentPadding = true;
+            for (int i = data.length - p; i < data.length; ++i) {
+                byte currentByte = data[i];
+                if (currentByte != p) {
+                    hasCurrentPadding = false;
+                    break;
+                }
+            }
+            if (hasCurrentPadding) {
+                return p;
+            }
+        }
+        return 0;
     }
     
 }
