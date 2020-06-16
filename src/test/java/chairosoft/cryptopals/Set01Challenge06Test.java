@@ -26,8 +26,8 @@ public class Set01Challenge06Test extends TestBase {
         assertThat("Hamming Distance", actualHammingDistance, equalTo(expectedHammingDistance));
         // test break repeating xor
         String inputFile = "src/test/resources/challenge-data/06.txt";
-        String keySizeMin = "2";
-        String keySizeMax = "40";
+        int keySizeMin = 2;
+        int keySizeMax = 40;
         String expectedResultPrefix = "[Terminator X: Bring the noise]";
         long expectedResultLineCount = 79;
         assertResultOutput(

@@ -32,11 +32,15 @@ public abstract class TestBase {
     
     
     ////// Static Methods //////
-    public static byte[] getStdOut(MainMethod mainMethod, String... args) throws Exception {
+    public static byte[] getStdOut(MainMethod mainMethod, Object... argObjects) throws Exception {
         PrintStream originalOut = System.out;
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         byte[] result;
         try (PrintStream tempOut = new PrintStream(baos)) {
+            String[] args = new String[argObjects.length];
+            for (int i = 0; i < args.length; ++i) {
+                args[i] = argObjects[i] == null ? null : String.valueOf(argObjects[i]);
+            }
             System.setOut(tempOut);
             mainMethod.doMain(args);
         }
@@ -53,11 +57,11 @@ public abstract class TestBase {
         String expectedResultPrefix,
         long expectedResultLineCount,
         MainMethod mainMethod,
-        String... args
+        Object... argObjects
     )
         throws Exception
     {
-        byte[] actualResultBytes = getStdOut(mainMethod, args);
+        byte[] actualResultBytes = getStdOut(mainMethod, argObjects);
         String actualResult = new String(actualResultBytes, COMMON_CHARSET);
         assertThat("Result Output", actualResult, startsWith(expectedResultPrefix));
         long actualResultLineCount = actualResult.codePoints().filter(c -> c == '\n').count();

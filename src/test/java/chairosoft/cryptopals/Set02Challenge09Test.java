@@ -17,7 +17,7 @@ public class Set02Challenge09Test extends TestBase {
         String inputText = "YELLOW SUBMARINE";
         int blockSize = 20;
         String expectedOutputText = "YELLOW SUBMARINE\\x[04040404]\n";
-        byte[] actualOutput = getStdOut(Set02Challenge09::main, inputText, "" + blockSize);
+        byte[] actualOutput = getStdOut(Set02Challenge09::main, inputText, blockSize);
         String actualOutputText = new String(actualOutput, COMMON_CHARSET);
         assertThat("Output Text", actualOutputText, equalTo(expectedOutputText));
     }
