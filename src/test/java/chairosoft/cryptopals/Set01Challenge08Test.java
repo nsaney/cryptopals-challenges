@@ -10,7 +10,7 @@ public class Set01Challenge08Test extends TestBase {
     ////// Instance Methods - Tests //////
     @Test
     public void doTest() throws Exception {
-        String inputFile = "src/test/resources/set01/8.txt";
+        String inputFile = "src/test/resources/challenge-data/08.txt";
         String expectedResultPrefix = "Line #0133: ";
         long expectedResultLineCount = 1;
         assertResultOutput(expectedResultPrefix, expectedResultLineCount, Set01Challenge08::main, inputFile);

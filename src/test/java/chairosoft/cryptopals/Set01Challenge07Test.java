@@ -10,7 +10,7 @@ public class Set01Challenge07Test extends TestBase {
     ////// Instance Methods - Tests //////
     @Test
     public void doTest() throws Exception {
-        String inputFile = "src/test/resources/set01/7.txt";
+        String inputFile = "src/test/resources/challenge-data/07.txt";
         String key = "YELLOW SUBMARINE";
         String expectedResultPrefix = "I'm back and I'm ringin' the bell";
         long expectedResultLineCount = 80;
