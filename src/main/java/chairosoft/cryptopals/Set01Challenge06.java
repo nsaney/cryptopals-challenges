@@ -99,7 +99,7 @@ public class Set01Challenge06 {
     
     
     ////// Static Inner Classes //////
-    public static class RepeatingXorCipherResult extends CipherResult<byte[]> {
+    public static class RepeatingXorCipherResult extends CipherResult<byte[], RuntimeException> {
         
         //// Constructor ////
         public RepeatingXorCipherResult(byte[] input, byte[] _key) {

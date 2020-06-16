@@ -28,7 +28,7 @@ public class Set01Challenge03 {
         return getMostLikelyEnglishCleartext(cipherResults);
     }
     
-    public static <T extends CipherResult<?>> T getMostLikelyEnglishCleartext(List<T> cipherResults) {
+    public static <T extends CipherResult<?, ?>> T getMostLikelyEnglishCleartext(List<T> cipherResults) {
         return cipherResults
             .stream()
             .filter(r -> hasOnlyEnglishChars(r.result))
@@ -59,7 +59,7 @@ public class Set01Challenge03 {
     
     
     ////// Static Inner Classes //////
-    public static class SingleCharXorCipherResult extends CipherResult<Byte> {
+    public static class SingleCharXorCipherResult extends CipherResult<Byte, RuntimeException> {
         
         //// Constructor ////
         public SingleCharXorCipherResult(byte[] input, byte _key) {

@@ -165,20 +165,20 @@ public final class Common {
     
     
     ////// Static Inner Classes //////
-    public static abstract class CipherResult<T> {
+    public static abstract class CipherResult<T, Ex extends Exception> {
         
         //// Instance Fields ////
         public final T key;
         public final byte[] result;
         
         //// Constructor ////
-        public CipherResult(byte[] input, T _key) {
+        public CipherResult(byte[] input, T _key) throws Ex {
             this.key = _key;
             this.result = this.getResultFromInput(input);
         }
         
         //// Instance Methods - Abstract ////
-        public abstract byte[] getResultFromInput(byte[] input);
+        public abstract byte[] getResultFromInput(byte[] input) throws Ex;
         public abstract String getKeyText();
         
         //// Instance Methods - Concrete ////
@@ -195,6 +195,62 @@ public final class Common {
                 frequencyTable.incrementFrequency(b);
             }
             return frequencyTable;
+        }
+        
+    }
+    
+    public static class AlgorithmCipherInfo {
+        
+        //// Instance Fields ////
+        public final String algorithmName;
+        public final String algorithmMode;
+        public final String paddingScheme;
+        public final byte[] key;
+        
+        //// Constructor ////
+        public AlgorithmCipherInfo(
+            String _algorithmName,
+            String _algorithmMode,
+            String _paddingScheme,
+            byte[] _key
+        ) {
+            this.algorithmName = _algorithmName;
+            this.algorithmMode = _algorithmMode;
+            this.paddingScheme = _paddingScheme;
+            this.key = _key.clone();
+        }
+        
+    }
+    
+    public static class AlgorithmCipherResult extends CipherResult<AlgorithmCipherInfo, GeneralSecurityException> {
+        
+        //// Constructor ////
+        public AlgorithmCipherResult(byte[] input, AlgorithmCipherInfo _key) throws GeneralSecurityException {
+            super(input, _key);
+        }
+        
+        //// Instance Methods ////
+        @Override
+        public byte[] getResultFromInput(byte[] input) throws GeneralSecurityException {
+            return applyCipher(
+                this.key.algorithmName,
+                this.key.algorithmMode,
+                this.key.paddingScheme,
+                Cipher.DECRYPT_MODE,
+                this.key.key,
+                input
+            );
+        }
+        
+        @Override
+        public String getKeyText() {
+            return String.format(
+                "alg=%s/%s/%s;key=%s",
+                this.key.algorithmName,
+                this.key.algorithmMode,
+                this.key.paddingScheme,
+                toDisplayableText(this.key.key)
+            );
         }
         
     }
