@@ -2,8 +2,7 @@ package chairosoft.cryptopals;
 
 import org.junit.Test;
 
-import static chairosoft.cryptopals.Common.COMMON_CHARSET;
-import static chairosoft.cryptopals.Common.parseFromHex;
+import static chairosoft.cryptopals.Common.toUtf8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
@@ -21,7 +20,7 @@ public class Set01Challenge05Test extends TestBase {
         String expectedOutput = "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272"
                               + "a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f";
         byte[] actualOutputBytes = getStdOut(Set01Challenge05::main, dataText, keyText);
-        String actualOutput = new String(actualOutputBytes, COMMON_CHARSET);
+        String actualOutput = toUtf8(actualOutputBytes);
         assertThat(actualOutput, equalTo(expectedOutput));
     }
 }

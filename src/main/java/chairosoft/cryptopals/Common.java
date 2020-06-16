@@ -27,6 +27,14 @@ public final class Common {
         return Math.min(data.length, off + len);
     }
     
+    public static byte[] fromUtf8(String text) {
+        return text.getBytes(COMMON_CHARSET);
+    }
+    
+    public static String toUtf8(byte[] data) {
+        return new String(data, COMMON_CHARSET);
+    }
+    
     public static byte[] fromHex(String hexText) {
         int textLen = hexText.length();
         int dataLen = textLen / 2;

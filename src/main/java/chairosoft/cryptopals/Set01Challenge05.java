@@ -9,8 +9,8 @@ public class Set01Challenge05 {
     
     ////// Main Method //////
     public static void main(String... args) throws Exception {
-        byte[] data = args[0].getBytes(COMMON_CHARSET);
-        byte[] key = args[1].getBytes(COMMON_CHARSET);
+        byte[] data = fromUtf8(args[0]);
+        byte[] key = fromUtf8(args[1]);
         byte[] output = applyRepeatingKeyXor(data, key);
         String outputText = toHex(output);
         System.out.print(outputText);

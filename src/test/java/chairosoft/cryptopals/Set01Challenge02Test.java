@@ -18,7 +18,7 @@ public class Set01Challenge02Test extends TestBase {
         String y = "686974207468652062756c6c277320657965";
         String expectedOutput = "746865206b696420646f6e277420706c6179";
         byte[] actualOutputBytes = getStdOut(Set01Challenge02::main, x, y);
-        String actualOutput = new String(actualOutputBytes, COMMON_CHARSET);
+        String actualOutput = toUtf8(actualOutputBytes);
         assertThat(actualOutput, equalTo(expectedOutput));
         String xText = parseFromHex(x);
         String yText = parseFromHex(y);

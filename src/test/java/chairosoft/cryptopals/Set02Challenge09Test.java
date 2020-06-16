@@ -2,7 +2,7 @@ package chairosoft.cryptopals;
 
 import org.junit.Test;
 
-import static chairosoft.cryptopals.Common.COMMON_CHARSET;
+import static chairosoft.cryptopals.Common.toUtf8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
@@ -16,10 +16,10 @@ public class Set02Challenge09Test extends TestBase {
     public void doTest() throws Exception {
         String inputText = "YELLOW SUBMARINE";
         int blockSize = 20;
-        String expectedOutputText = "YELLOW SUBMARINE\\x[04040404]\n";
-        byte[] actualOutput = getStdOut(Set02Challenge09::main, inputText, blockSize);
-        String actualOutputText = new String(actualOutput, COMMON_CHARSET);
-        assertThat("Output Text", actualOutputText, equalTo(expectedOutputText));
+        String expectedOutput = "YELLOW SUBMARINE\\x[04040404]\n";
+        byte[] actualOutputBytes = getStdOut(Set02Challenge09::main, inputText, blockSize);
+        String actualOutput = toUtf8(actualOutputBytes);
+        assertThat("Output Text", actualOutput, equalTo(expectedOutput));
     }
     
 }

@@ -6,7 +6,7 @@ import org.junit.BeforeClass;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
-import static chairosoft.cryptopals.Common.COMMON_CHARSET;
+import static chairosoft.cryptopals.Common.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
@@ -62,7 +62,7 @@ public abstract class TestBase {
         throws Exception
     {
         byte[] actualResultBytes = getStdOut(mainMethod, argObjects);
-        String actualResult = new String(actualResultBytes, COMMON_CHARSET);
+        String actualResult = toUtf8(actualResultBytes);
         assertThat("Result Output", actualResult, startsWith(expectedResultPrefix));
         long actualResultLineCount = actualResult.codePoints().filter(c -> c == '\n').count();
         assertThat("Line Count", actualResultLineCount, equalTo(expectedResultLineCount));

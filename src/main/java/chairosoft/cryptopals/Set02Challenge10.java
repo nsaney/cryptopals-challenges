@@ -14,8 +14,8 @@ public class Set02Challenge10 {
     ////// Main Method //////
     public static void main(String... args) throws Exception {
         byte[] data = readFileBase64(args[0]);
-        byte[] key = args[1].getBytes(COMMON_CHARSET);
-        byte[] iv = args[2].getBytes(COMMON_CHARSET);
+        byte[] key = fromUtf8(args[1]);
+        byte[] iv = fromUtf8(args[2]);
         byte[] output = decryptAesCbc(data, key, iv);
         System.out.write(output);
         System.out.println();

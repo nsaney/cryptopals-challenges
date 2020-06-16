@@ -11,7 +11,7 @@ public class Set02Challenge09 {
     
     ////// Main Method //////
     public static void main(String... args) throws Exception {
-        byte[] input = args[0].getBytes(COMMON_CHARSET);
+        byte[] input = fromUtf8(args[0]);
         int blockSize = Integer.parseInt(args[1]);
         byte[] output = applyPkcs7(blockSize, input);
         String outputText = toDisplayableText(output);
