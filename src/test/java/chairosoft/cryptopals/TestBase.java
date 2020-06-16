@@ -6,6 +6,10 @@ import org.junit.BeforeClass;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
+import static chairosoft.cryptopals.Common.COMMON_CHARSET;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+
 public abstract class TestBase {
     
     ////// Setup/Teardown Methods //////
@@ -43,6 +47,21 @@ public abstract class TestBase {
             System.out.println();
         }
         return result;
+    }
+    
+    public static void assertResultOutput(
+        String expectedResultPrefix,
+        long expectedResultLineCount,
+        MainMethod mainMethod,
+        String... args
+    )
+        throws Exception
+    {
+        byte[] actualResultBytes = getStdOut(mainMethod, args);
+        String actualResult = new String(actualResultBytes, COMMON_CHARSET);
+        assertThat("Result Output", actualResult, startsWith(expectedResultPrefix));
+        long actualResultLineCount = actualResult.codePoints().filter(c -> c == '\n').count();
+        assertThat("Line Count", actualResultLineCount, equalTo(expectedResultLineCount));
     }
     
 }
