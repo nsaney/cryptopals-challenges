@@ -111,6 +111,12 @@ public final class Common {
                 if (c == '\\') {
                     sb.append("\\\\");
                 }
+                else if (c == '\t') {
+                    sb.append("\\t");
+                }
+                else if (c == '\r') {
+                    sb.append("\\r");
+                }
                 else {
                     sb.append(c);
                 }
