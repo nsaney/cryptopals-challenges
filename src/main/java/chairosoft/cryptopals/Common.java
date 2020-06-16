@@ -2,13 +2,13 @@ package chairosoft.cryptopals;
 
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.File;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.security.*;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -92,6 +92,18 @@ public final class Common {
     
     public static String toBase64Text(byte[] data) {
         return Base64.getEncoder().encodeToString(data);
+    }
+    
+    public static byte[] readFileBase64(String fileName) throws IOException {
+        File dataFile = new File(fileName);
+        byte[] dataBase64 = Files.readAllBytes(dataFile.toPath());
+        return fromBase64(dataBase64, true);
+    }
+    
+    public static List<byte[]> readFileLinesHex(String fileName) throws IOException {
+        File dataFile = new File(fileName);
+        List<String> hexLines = Files.readAllLines(dataFile.toPath());
+        return hexLines.stream().map(Common::fromHex).collect(Collectors.toList());
     }
     
     public static boolean isDisplayableChar(int code) {

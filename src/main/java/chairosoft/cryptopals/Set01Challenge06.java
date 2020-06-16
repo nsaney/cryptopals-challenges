@@ -2,8 +2,6 @@ package chairosoft.cryptopals;
 
 import chairosoft.cryptopals.Set01Challenge03.SingleCharXorCipherResult;
 
-import java.io.File;
-import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -16,9 +14,7 @@ public class Set01Challenge06 {
     
     ////// Main Method //////
     public static void main(String... args) throws Exception {
-        File inputFile = new File(args[0]);
-        byte[] dataBase64 = Files.readAllBytes(inputFile.toPath());
-        byte[] data = fromBase64(dataBase64, true);
+        byte[] data = readFileBase64(args[0]);
         int keySizeMin = Integer.parseInt(args[1]);
         int keySizeMax = Integer.parseInt(args[2]);
         RepeatingXorCipherResult output = breakRepeatingKeyXor(data, keySizeMin, keySizeMax);

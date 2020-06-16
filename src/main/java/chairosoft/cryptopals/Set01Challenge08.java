@@ -2,10 +2,7 @@ package chairosoft.cryptopals;
 
 import chairosoft.cryptopals.Common.*;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
 
 import static chairosoft.cryptopals.Common.*;
 
@@ -16,9 +13,7 @@ public class Set01Challenge08 {
     
     ////// Main Method //////
     public static void main(String... args) throws Exception {
-        File inputFile = new File(args[0]);
-        List<String> textLines = Files.readAllLines(inputFile.toPath());
-        List<byte[]> dataLines = textLines.stream().map(Common::fromHex).collect(Collectors.toList());
+        List<byte[]> dataLines = readFileLinesHex(args[0]);
         for (int i = 0; i < dataLines.size(); ++i) {
             int line = i + 1;
             byte[] data = dataLines.get(i);
