@@ -41,8 +41,9 @@ public final class Common {
         int textLen = dataLen * 2;
         StringBuilder sb = new StringBuilder(textLen);
         for (byte valueData : data) {
-            String valueText = Integer.toString(valueData, 16);
-            if (valueData < 16) {
+            int valueUnsigned = valueData & 0xff;
+            String valueText = Integer.toString(valueUnsigned, 16);
+            if (valueUnsigned < 16) {
                 sb.append("0");
             }
             sb.append(valueText);
@@ -92,9 +93,15 @@ public final class Common {
     }
     
     public static String toDisplayableText(byte... data) {
+        return toDisplayableText(data, 0, data.length);
+    }
+    
+    public static String toDisplayableText(byte[] data, int off, int len) {
         StringBuilder sb = new StringBuilder(data.length);
         boolean inSpecialMode = false;
-        for (byte b : data) {
+        int max = Math.min(data.length, off + len);
+        for (int i = off; i < max; ++i) {
+            byte b = data[i];
             int code = b & 0xff;
             boolean isSpecial = isSpecialChar(code);
             boolean changeMode = isSpecial != inSpecialMode;
