@@ -211,7 +211,18 @@ public final class Common {
     )
         throws GeneralSecurityException
     {
-        return applyCipher(algorithmName, algorithmMode, paddingScheme, cipherMode, key, data, 0, data.length);
+        return applyCipher(
+            algorithmName,
+            algorithmMode,
+            paddingScheme,
+            cipherMode,
+            key,
+            data,
+            0,
+            null,
+            -1,
+            data.length
+        );
     }
     
     public static byte[] applyCipher(
@@ -221,7 +232,9 @@ public final class Common {
         int cipherMode,
         byte[] key,
         byte[] data,
-        int off,
+        int dataOff,
+        byte[] out,
+        int outOff,
         int len
     )
         throws GeneralSecurityException
@@ -230,7 +243,10 @@ public final class Common {
         Cipher cipher = Cipher.getInstance(transformation);
         SecretKey secretKey = new SecretKeySpec(key, algorithmName);
         cipher.init(cipherMode, secretKey);
-        return cipher.doFinal(data, off, len);
+        byte[] result = out == null ? new byte[len] : out;
+        outOff = out == null ? 0 : outOff;
+        cipher.doFinal(data, dataOff, len, out, outOff);
+        return result;
     }
     
     
