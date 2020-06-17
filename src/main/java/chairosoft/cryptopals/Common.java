@@ -251,10 +251,13 @@ public final class Common {
         Cipher cipher = Cipher.getInstance(transformation);
         SecretKey secretKey = new SecretKeySpec(key, algorithmName);
         cipher.init(cipherMode, secretKey);
-        byte[] result = out == null ? new byte[len] : out;
-        int resultOff = out == null ? 0 : outOff;
-        cipher.doFinal(data, dataOff, len, result, resultOff);
-        return result;
+        if (out == null) {
+            return cipher.doFinal(data, dataOff, len);
+        }
+        else {
+            cipher.doFinal(data, dataOff, len, out, outOff);
+            return out;
+        }
     }
     
     
