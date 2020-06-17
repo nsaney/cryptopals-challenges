@@ -1,5 +1,6 @@
-package chairosoft.cryptopals;
+package chairosoft.cryptopals.set01;
 
+import chairosoft.cryptopals.TestBase;
 import org.junit.Test;
 
 import static chairosoft.cryptopals.Common.*;
@@ -9,7 +10,7 @@ import static org.hamcrest.Matchers.equalTo;
 /**
  * https://cryptopals.com/sets/1/challenges/2
  */
-public class Set01Challenge02Test extends TestBase {
+public class Challenge02Test extends TestBase {
     
     ////// Instance Methods - Tests //////
     @Test
@@ -17,7 +18,7 @@ public class Set01Challenge02Test extends TestBase {
         String x = "1c0111001f010100061a024b53535009181c";
         String y = "686974207468652062756c6c277320657965";
         String expectedOutput = "746865206b696420646f6e277420706c6179";
-        byte[] actualOutputBytes = getStdOut(Set01Challenge02::main, x, y);
+        byte[] actualOutputBytes = getStdOut(Challenge02::main, x, y);
         String actualOutput = toUtf8(actualOutputBytes);
         assertThat(actualOutput, equalTo(expectedOutput));
         String xText = parseFromHex(x);

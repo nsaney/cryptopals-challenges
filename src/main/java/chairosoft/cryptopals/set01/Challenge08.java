@@ -1,4 +1,4 @@
-package chairosoft.cryptopals;
+package chairosoft.cryptopals.set01;
 
 import chairosoft.cryptopals.Common.*;
 
@@ -9,7 +9,7 @@ import static chairosoft.cryptopals.Common.*;
 /**
  * https://cryptopals.com/sets/1/challenges/8
  */
-public class Set01Challenge08 {
+public class Challenge08 {
     
     ////// Main Method //////
     public static void main(String... args) throws Exception {
@@ -17,7 +17,7 @@ public class Set01Challenge08 {
         for (int i = 0; i < dataLines.size(); ++i) {
             int line = i + 1;
             byte[] data = dataLines.get(i);
-            CipherResult<?, ?> cipherResult = Set01Challenge06.breakRepeatingKeyXor(data, 1, Math.min(48, data.length / 3));
+            CipherResult<?, ?> cipherResult = Challenge06.breakRepeatingKeyXor(data, 1, Math.min(48, data.length / 3));
             if (cipherResult != null) {
                 System.out.printf("Line #%04d: %s\n", line, cipherResult);
             }
@@ -34,7 +34,7 @@ public class Set01Challenge08 {
         int maxLen = data.length - remainder;
         for (int i = 0; i < maxLen; i += blockSize) {
             for (int j = i + blockSize; j < maxLen; j += blockSize) {
-                int hammingDistance = Set01Challenge06.hammingDistance(data, i, j, blockSize);
+                int hammingDistance = Challenge06.hammingDistance(data, i, j, blockSize);
                 if (hammingDistance == 0) {
                     System.err.printf(
                         "Found match between [%04d:%04d] and [%04d:%04d]: %s\n\n",

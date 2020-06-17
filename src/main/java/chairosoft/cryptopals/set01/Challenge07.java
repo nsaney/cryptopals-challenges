@@ -1,4 +1,4 @@
-package chairosoft.cryptopals;
+package chairosoft.cryptopals.set01;
 
 import javax.crypto.Cipher;
 
@@ -7,7 +7,7 @@ import static chairosoft.cryptopals.Common.*;
 /**
  * https://cryptopals.com/sets/1/challenges/7
  */
-public class Set01Challenge07 {
+public class Challenge07 {
     
     ////// Main Method //////
     public static void main(String... args) throws Exception {

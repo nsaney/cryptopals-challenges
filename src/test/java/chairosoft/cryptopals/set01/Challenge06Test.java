@@ -1,5 +1,6 @@
-package chairosoft.cryptopals;
+package chairosoft.cryptopals.set01;
 
+import chairosoft.cryptopals.TestBase;
 import org.junit.Test;
 
 import static chairosoft.cryptopals.Common.fromUtf8;
@@ -9,7 +10,7 @@ import static org.hamcrest.Matchers.equalTo;
 /**
  * https://cryptopals.com/sets/1/challenges/6
  */
-public class Set01Challenge06Test extends TestBase {
+public class Challenge06Test extends TestBase {
     
     ////// Instance Methods - Tests //////
     @Test
@@ -18,11 +19,11 @@ public class Set01Challenge06Test extends TestBase {
         byte[] hammingX = fromUtf8("this is a test");
         byte[] hammingY = fromUtf8("wokka wokka!!!");
         int expectedHammingDistance = 37;
-        int actualHammingDistance = Set01Challenge06.hammingDistance(hammingX, hammingY);
+        int actualHammingDistance = Challenge06.hammingDistance(hammingX, hammingY);
         System.out.println("Hamming Distance Check: " + actualHammingDistance);
         assertThat("Hamming Distance", actualHammingDistance, equalTo(expectedHammingDistance));
         // test break repeating xor
-        String inputFile = "src/test/resources/challenge-data/06.txt";
+        String inputFile = "src/test/resources/challenge-data/set01/06.txt";
         int keySizeMin = 2;
         int keySizeMax = 40;
         String expectedResultPrefix = "[Terminator X: Bring the noise]";
@@ -30,7 +31,7 @@ public class Set01Challenge06Test extends TestBase {
         assertResultOutput(
             expectedResultPrefix,
             expectedResultLineCount,
-            Set01Challenge06::main,
+            Challenge06::main,
             inputFile,
             keySizeMin,
             keySizeMax

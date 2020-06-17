@@ -1,4 +1,4 @@
-package chairosoft.cryptopals;
+package chairosoft.cryptopals.set01;
 
 import static chairosoft.cryptopals.Common.fromHex;
 import static chairosoft.cryptopals.Common.toBase64Text;
@@ -6,7 +6,7 @@ import static chairosoft.cryptopals.Common.toBase64Text;
 /**
  * https://cryptopals.com/sets/1/challenges/1
  */
-public class Set01Challenge01 {
+public class Challenge01 {
     
     ////// Main Method //////
     public static void main(String... args) throws Exception {

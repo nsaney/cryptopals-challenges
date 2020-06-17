@@ -1,4 +1,4 @@
-package chairosoft.cryptopals;
+package chairosoft.cryptopals.set02;
 
 import javax.crypto.Cipher;
 
@@ -10,7 +10,7 @@ import static chairosoft.cryptopals.Common.*;
 /**
  * https://cryptopals.com/sets/2/challenges/10
  */
-public class Set02Challenge10 {
+public class Challenge10 {
     
     ////// Main Method //////
     public static void main(String... args) throws Exception {
@@ -26,7 +26,7 @@ public class Set02Challenge10 {
     ////// Static Methods //////
     public static byte[] encryptAesCbc(byte[] data, byte[] key, byte[] iv) throws GeneralSecurityException {
         int blockSize = iv.length;
-        byte[] paddedData = Set02Challenge09.applyPkcs7(blockSize, data);
+        byte[] paddedData = Challenge09.applyPkcs7(blockSize, data);
         byte[] currentCombinedBlock = new byte[blockSize];
         byte[] result = new byte[paddedData.length];
         for (int i = 0; i < result.length; i += blockSize) {

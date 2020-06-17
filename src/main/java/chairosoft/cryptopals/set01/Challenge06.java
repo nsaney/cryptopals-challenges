@@ -1,6 +1,6 @@
-package chairosoft.cryptopals;
+package chairosoft.cryptopals.set01;
 
-import chairosoft.cryptopals.Set01Challenge03.SingleCharXorCipherResult;
+import chairosoft.cryptopals.set01.Challenge03.SingleCharXorCipherResult;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -10,7 +10,7 @@ import static chairosoft.cryptopals.Common.*;
 /**
  * https://cryptopals.com/sets/1/challenges/6
  */
-public class Set01Challenge06 {
+public class Challenge06 {
     
     ////// Main Method //////
     public static void main(String... args) throws Exception {
@@ -57,14 +57,14 @@ public class Set01Challenge06 {
                     transposedBlock[j] = data[x];
                 }
                 // step 7
-                SingleCharXorCipherResult blockCipherResult = Set01Challenge03.getMostLikelyEnglishCleartext(transposedBlock);
+                SingleCharXorCipherResult blockCipherResult = Challenge03.getMostLikelyEnglishCleartext(transposedBlock);
                 // step 8
                 probableKey[i] = blockCipherResult == null ? 0 : blockCipherResult.key;
             }
             RepeatingXorCipherResult fullCipherResult = new RepeatingXorCipherResult(data, probableKey);
             probableResults.add(fullCipherResult);
         }
-        return Set01Challenge03.getMostLikelyEnglishCleartext(probableResults);
+        return Challenge03.getMostLikelyEnglishCleartext(probableResults);
     }
     
     public static int hammingDistance(byte[] x, byte[] y) {
@@ -105,7 +105,7 @@ public class Set01Challenge06 {
         //// Instance Methods ////
         @Override
         public byte[] getResultFromInput(byte[] input) {
-            return Set01Challenge05.applyRepeatingKeyXor(input, this.key);
+            return Challenge05.applyRepeatingKeyXor(input, this.key);
         }
         
         @Override
