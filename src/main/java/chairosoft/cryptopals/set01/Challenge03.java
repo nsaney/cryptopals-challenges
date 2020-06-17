@@ -20,7 +20,8 @@ public class Challenge03 {
     ////// Static Methods //////
     public static SingleCharXorCipherResult getMostLikelyEnglishCleartext(byte[] singleCharXorCipher) {
         List<SingleCharXorCipherResult> cipherResults = new ArrayList<>();
-        for (byte b = Byte.MIN_VALUE; b < Byte.MAX_VALUE; ++b) {
+        for (int x = Byte.MIN_VALUE; x <= Byte.MAX_VALUE; ++x) {
+            byte b = (byte)x;
             SingleCharXorCipherResult cipherResult = new SingleCharXorCipherResult(singleCharXorCipher, b);
             cipherResults.add(cipherResult);
         }

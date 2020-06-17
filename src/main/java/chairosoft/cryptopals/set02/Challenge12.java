@@ -3,7 +3,9 @@ package chairosoft.cryptopals.set02;
 import chairosoft.cryptopals.set01.Challenge08;
 
 import javax.crypto.Cipher;
+import java.io.ByteArrayOutputStream;
 import java.security.GeneralSecurityException;
+import java.util.Arrays;
 
 import static chairosoft.cryptopals.Common.*;
 
@@ -40,11 +42,28 @@ public class Challenge12 {
         byte[] doubledBlocks = extendRepeat(repeaterBlock, blockSize * 2);
         byte[] encryptedDataFromDoubledBlocks = oracleFn.apply(doubledBlocks);
         boolean isEcb = Challenge08.hasRepeatBlocks(encryptedDataFromDoubledBlocks, blockSize);
-        // 03: TODO
+        // 03: block-minus-one
+        byte[] bmo = new byte[blockSize - 1];
+        byte[] encryptedFromBmo = oracleFn.apply(bmo);
+        byte[] firstEncryptedBlockFromBmo = Arrays.copyOf(encryptedFromBmo, blockSize);
+        // 04 and 05: cycle last value and match bmo output
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        for (int x = Byte.MIN_VALUE; x <= Byte.MAX_VALUE; ++x) {
+            byte b = (byte)x;
+            byte[] cycler = Arrays.copyOf(bmo, blockSize);
+            cycler[blockSize - 1] = b;
+            byte[] encryptedFromCycler = oracleFn.apply(cycler);
+            if (areEqual(firstEncryptedBlockFromBmo, 0, encryptedFromCycler, 0, blockSize)) {
+                baos.write(b);
+                break;
+            }
+        }
+        // 06: TODO: repeat for remainder
+        byte[] result = baos.toByteArray();
         return new DecryptionDetails12(
             blockSize,
             isEcb,
-            fromUtf8("----TODO----")
+            result
         );
     }
     
