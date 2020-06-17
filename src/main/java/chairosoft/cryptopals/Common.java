@@ -20,6 +20,7 @@ public final class Common {
     
     ////// Constants //////
     public static final Charset COMMON_CHARSET = StandardCharsets.UTF_8;
+    public static final ThreadLocal<Random> THREAD_LOCAL_RANDOM = ThreadLocal.withInitial(Random::new);
     
     
     ////// Static Methods - Data Formats and Display //////
@@ -257,6 +258,24 @@ public final class Common {
         else {
             cipher.doFinal(data, dataOff, len, out, outOff);
             return out;
+        }
+    }
+    
+    ////// Static Methods - Random //////
+    public static void randomBytes(byte[] bytes) {
+        randomBytes(bytes, 0, bytes.length);
+    }
+    
+    public static void randomBytes(byte[] bytes, int off, int len) {
+        Random random = THREAD_LOCAL_RANDOM.get();
+        int max = maxIndex(bytes, off, len);
+        // logic taken from Random#nextBytes()
+        for (int i = off; i < max; ) {
+            int rnd = random.nextInt();
+            int n = Math.min(max - i, Integer.SIZE / Byte.SIZE);
+            for ( ; n --> 0; ++i, rnd >>= Byte.SIZE) {
+                bytes[i] = (byte)rnd;
+            }
         }
     }
     
