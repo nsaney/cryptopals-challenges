@@ -60,4 +60,5 @@ public class Challenge11 {
             this.encryptedData = _encryptedData;
         }
     }
+    
 }
