@@ -61,10 +61,11 @@ public class Challenge12 {
     }
     
     
-    ////// Static Methods //////
+    ////// Static Inner Classes //////
     public interface OracleFunction12 {
         byte[] apply(byte[] knownData) throws GeneralSecurityException;
     }
+    
     public static class DecryptionDetails12 {
         public final int blockSize;
         public final boolean isEcb;

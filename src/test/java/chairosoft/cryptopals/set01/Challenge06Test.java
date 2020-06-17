@@ -3,7 +3,7 @@ package chairosoft.cryptopals.set01;
 import chairosoft.cryptopals.TestBase;
 import org.junit.Test;
 
-import static chairosoft.cryptopals.Common.fromUtf8;
+import static chairosoft.cryptopals.Common.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
@@ -19,7 +19,7 @@ public class Challenge06Test extends TestBase {
         byte[] hammingX = fromUtf8("this is a test");
         byte[] hammingY = fromUtf8("wokka wokka!!!");
         int expectedHammingDistance = 37;
-        int actualHammingDistance = Challenge06.hammingDistance(hammingX, hammingY);
+        int actualHammingDistance = hammingDistance(hammingX, hammingY);
         System.out.println("Hamming Distance Check: " + actualHammingDistance);
         assertThat("Hamming Distance", actualHammingDistance, equalTo(expectedHammingDistance));
         // test break repeating xor

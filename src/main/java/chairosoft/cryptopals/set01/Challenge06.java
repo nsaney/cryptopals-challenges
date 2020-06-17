@@ -67,32 +67,6 @@ public class Challenge06 {
         return Challenge03.getMostLikelyEnglishCleartext(probableResults);
     }
     
-    public static int hammingDistance(byte[] x, byte[] y) {
-        boolean isXShorter = x.length < y.length;
-        int minLength = isXShorter ? x.length : y.length;
-        int maxLength = isXShorter ? y.length : x.length;
-        int overflowBytes = maxLength - minLength;
-        int overflowBits = 8 * overflowBytes;
-        int distanceBits = hammingDistance(x, 0, y, 0, minLength);
-        return distanceBits + overflowBits;
-    }
-    
-    public static int hammingDistance(byte[] data, int xOff, int yOff, int length) {
-        return hammingDistance(data, xOff, data, yOff, length);
-    }
-    
-    public static int hammingDistance(byte[] x, int xOff, byte[] y, int yOff, int length) {
-        int distanceBits = 0;
-        for (int i = 0; i < length; ++i) {
-            byte xi = x[i + xOff];
-            byte yi = y[i + yOff];
-            int currenXor = (xi ^ yi) & 0xff;
-            int currentDistanceBits = Integer.bitCount(currenXor);
-            distanceBits += currentDistanceBits;
-        }
-        return distanceBits;
-    }
-    
     
     ////// Static Inner Classes //////
     public static class RepeatingXorCipherResult extends CipherResult<byte[], RuntimeException> {

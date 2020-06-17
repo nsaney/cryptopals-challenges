@@ -176,6 +176,62 @@ public final class Common {
         return baseBlockSize + (indexHasOneExtra ? 1 : 0);
     }
     
+    ////// Static Methods - Simple Manipulation //////
+    public static int hammingDistance(byte[] x, byte[] y) {
+        boolean isXShorter = x.length < y.length;
+        int minLength = isXShorter ? x.length : y.length;
+        int maxLength = isXShorter ? y.length : x.length;
+        int overflowBytes = maxLength - minLength;
+        int overflowBits = 8 * overflowBytes;
+        int distanceBits = hammingDistance(x, 0, y, 0, minLength);
+        return distanceBits + overflowBits;
+    }
+    
+    public static int hammingDistance(byte[] data, int xOff, int yOff, int length) {
+        return hammingDistance(data, xOff, data, yOff, length);
+    }
+    
+    public static int hammingDistance(byte[] x, int xOff, byte[] y, int yOff, int length) {
+        int distanceBits = 0;
+        for (int i = 0; i < length; ++i) {
+            byte xi = x[i + xOff];
+            byte yi = y[i + yOff];
+            int currentXor = (xi ^ yi) & 0xff;
+            int currentDistanceBits = Integer.bitCount(currentXor);
+            distanceBits += currentDistanceBits;
+        }
+        return distanceBits;
+    }
+    
+    public static boolean areEqual(byte[] x, byte[] y) {
+        return Arrays.equals(x, y);
+    }
+    
+    public static boolean areEqual(byte[] data, int xOff, int yOff, int length) {
+        return areEqual(data, xOff, data, yOff, length);
+    }
+    
+    public static boolean areEqual(byte[] x, int xOff, byte[] y, int yOff, int length) {
+        for (int i = 0; i < length; ++i) {
+            byte xi = x[i + xOff];
+            byte yi = y[i + yOff];
+            if (xi != yi) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    public static byte[] extendRepeat(byte[] original, int newLength) {
+        byte[] result = Arrays.copyOf(original, newLength);
+        int originalLength = original.length;
+        for (int i = originalLength; i < newLength; ++i) {
+            int j = i % originalLength;
+            result[i] = result[j];
+        }
+        return result;
+    }
+    
     ////// Static Methods - Crypto //////
     public static byte xor(byte xVal, byte yVal) {
         return (byte)((xVal ^ yVal) & 0xff);
@@ -259,16 +315,6 @@ public final class Common {
             cipher.doFinal(data, dataOff, len, out, outOff);
             return out;
         }
-    }
-    
-    public static byte[] extendRepeat(byte[] original, int newLength) {
-        byte[] result = Arrays.copyOf(original, newLength);
-        int originalLength = original.length;
-        for (int i = originalLength; i < newLength; ++i) {
-            int j = i % originalLength;
-            result[i] = result[j];
-        }
-        return result;
     }
     
     ////// Static Methods - Random //////

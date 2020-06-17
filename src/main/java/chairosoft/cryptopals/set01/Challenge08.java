@@ -38,8 +38,7 @@ public class Challenge08 {
         int maxLen = data.length - remainder;
         for (int i = 0; i < maxLen; i += blockSize) {
             for (int j = i + blockSize; j < maxLen; j += blockSize) {
-                int hammingDistance = Challenge06.hammingDistance(data, i, j, blockSize);
-                if (hammingDistance == 0) {
+                if (areEqual(data, i, j, blockSize)) {
                     if (showDebug) {
                         System.err.printf(
                             "Found match between [%04d:%04d] and [%04d:%04d]: %s\n\n",
