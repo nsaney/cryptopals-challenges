@@ -261,7 +261,23 @@ public final class Common {
         }
     }
     
+    public static byte[] extendRepeat(byte[] original, int newLength) {
+        byte[] result = Arrays.copyOf(original, newLength);
+        int originalLength = original.length;
+        for (int i = originalLength; i < newLength; ++i) {
+            int j = i % originalLength;
+            result[i] = result[j];
+        }
+        return result;
+    }
+    
     ////// Static Methods - Random //////
+    public static byte[] randomBytes(int length) {
+        byte[] bytes = new byte[length];
+        randomBytes(bytes);
+        return bytes;
+    }
+    
     public static void randomBytes(byte[] bytes) {
         randomBytes(bytes, 0, bytes.length);
     }

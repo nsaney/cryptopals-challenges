@@ -33,36 +33,31 @@ public class Challenge12 {
     
     public static DecryptionDetails12 getDecryptionDetails(OracleFunction12 oracleFn) throws Exception {
         // 01: block size
-        byte[] baseline = oracleFn.apply(new byte[0]);
-        int inputSize_01 = 0;
-        int outputSize_01a = baseline.length;
-        for ( ; outputSize_01a == baseline.length; ++inputSize_01) {
-            byte[] knownData_01a = new byte[inputSize_01];
-            byte[] output_01a = oracleFn.apply(knownData_01a);
-            outputSize_01a = output_01a.length;
-        }
-        int blockSize = 0;
-        int outputSize_01b = outputSize_01a;
-        for ( ; outputSize_01b == outputSize_01a; ++inputSize_01, ++blockSize) {
-            byte[] knownData_01b = new byte[inputSize_01];
-            byte[] output_01b = oracleFn.apply(knownData_01b);
-            outputSize_01b = output_01b.length;
-        }
+        int firstBlockBarrier = countBytesUntilNewBlock(oracleFn, 0);
+        int blockSize = countBytesUntilNewBlock(oracleFn, firstBlockBarrier);
         // 02: detect ecb
-        byte[] knownData_02 = new byte[blockSize * 2];
-        for (int i = 0; i < knownData_02.length; ++i) {
-            int m = i % blockSize;
-            byte b = (byte)(m & 0xff);
-            knownData_02[i] = b;
-        }
-        byte[] output_02 = oracleFn.apply(knownData_02);
-        boolean isEcb = Challenge08.hasRepeatBlocks(output_02, blockSize);
+        byte[] repeaterBlock = randomBytes(blockSize);
+        byte[] doubledBlocks = extendRepeat(repeaterBlock, blockSize * 2);
+        byte[] encryptedDataFromDoubledBlocks = oracleFn.apply(doubledBlocks);
+        boolean isEcb = Challenge08.hasRepeatBlocks(encryptedDataFromDoubledBlocks, blockSize);
         // 03: TODO
         return new DecryptionDetails12(
             blockSize,
             isEcb,
             fromUtf8("----TODO----")
         );
+    }
+    
+    public static int countBytesUntilNewBlock(OracleFunction12 oracleFn, int initialInputSize) throws Exception {
+        byte[] knownData = new byte[initialInputSize];
+        byte[] base = oracleFn.apply(knownData);
+        byte[] curr = base;
+        int count = 1;
+        for (int in = initialInputSize + 1; curr.length == base.length; ++in, ++count) {
+            knownData = new byte[in];
+            curr = oracleFn.apply(knownData);
+        }
+        return count;
     }
     
     
