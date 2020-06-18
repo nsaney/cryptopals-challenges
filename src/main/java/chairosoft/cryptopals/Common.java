@@ -177,6 +177,16 @@ public final class Common {
     }
     
     ////// Static Methods - Simple Manipulation //////
+    public static int count(byte c, byte... bytes) {
+        int sum = 0;
+        for (byte b : bytes) {
+            if (b == c) {
+                ++sum;
+            }
+        }
+        return sum;
+    }
+    
     public static int hammingDistance(byte[] x, byte[] y) {
         boolean isXShorter = x.length < y.length;
         int minLength = isXShorter ? x.length : y.length;

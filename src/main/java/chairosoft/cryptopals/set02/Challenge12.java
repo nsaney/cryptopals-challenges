@@ -42,23 +42,14 @@ public class Challenge12 {
         byte[] doubledBlocks = extendRepeat(repeaterBlock, blockSize * 2);
         byte[] encryptedDataFromDoubledBlocks = oracleFn.apply(doubledBlocks);
         boolean isEcb = Challenge08.hasRepeatBlocks(encryptedDataFromDoubledBlocks, blockSize);
-        // 03: block-minus-one
-        byte[] bmo = new byte[blockSize - 1];
-        byte[] encryptedFromBmo = oracleFn.apply(bmo);
-        byte[] firstEncryptedBlockFromBmo = Arrays.copyOf(encryptedFromBmo, blockSize);
-        // 04 and 05: cycle last value and match bmo output
+        // 03, 04, 05, 06: spacer and cycler
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        for (int x = Byte.MIN_VALUE; x <= Byte.MAX_VALUE; ++x) {
-            byte b = (byte)x;
-            byte[] cycler = Arrays.copyOf(bmo, blockSize);
-            cycler[blockSize - 1] = b;
-            byte[] encryptedFromCycler = oracleFn.apply(cycler);
-            if (areEqual(firstEncryptedBlockFromBmo, 0, encryptedFromCycler, 0, blockSize)) {
-                baos.write(b);
-                break;
-            }
+        byte[] encryptedBaseline = oracleFn.apply(new byte[0]);
+        int lastBlockGap = firstBlockBarrier - 1;
+        int targetSize = encryptedBaseline.length - lastBlockGap;
+        while (baos.size() < targetSize) {
+            breakNextByte(oracleFn, blockSize, baos);
         }
-        // 06: TODO: repeat for remainder
         byte[] result = baos.toByteArray();
         return new DecryptionDetails12(
             blockSize,
@@ -78,6 +69,52 @@ public class Challenge12 {
         }
         return count;
     }
+    
+    public static void breakNextByte(OracleFunction12 oracleFn, int blockSize, ByteArrayOutputStream baos) throws Exception {
+        byte[] known = baos.toByteArray();
+        int n = known.length;
+        int matchBlockIndex = n / blockSize;
+        int matchBlockOffset = blockSize * matchBlockIndex;
+        int spacerOverlap = (n + 1) % blockSize;
+        int spacerSize = (blockSize - spacerOverlap) % blockSize;
+        int cyclerSize = spacerSize + n + 1;
+        byte[] spacer = new byte[spacerSize];
+        byte[] encryptedFromSpacer = oracleFn.apply(spacer);
+        byte[] cycler = new byte[cyclerSize];
+        System.arraycopy(known, 0, cycler, spacerSize, n);
+        for (int x = Byte.MIN_VALUE; x <= Byte.MAX_VALUE; ++x) {
+            byte b = (byte)x;
+            cycler[cyclerSize - 1] = b;
+            byte[] encryptedFromCycler = oracleFn.apply(cycler);
+            if (areEqual(encryptedFromSpacer, matchBlockOffset, encryptedFromCycler, matchBlockOffset, blockSize)) {
+                baos.write(b);
+                return;
+            }
+        }
+        throw new IllegalStateException(String.format(
+            "No matches after known[%s] = %s ; spacerSize = %s ; cycler = %s",
+            n,
+            toDisplayableText(known),
+            spacerSize,
+            toDisplayableText(cycler)
+        ));
+    }
+    
+    // blockSize 4
+    // [0 0 0|z ...] spacer          n = 0
+    // [0 0 0 c|...] cycler
+    //
+    // [0 0|z y ...] spacer          n = 1
+    // [0 0 z c|...] cycler
+    //
+    // [0|z y x ...] spacer          n = 2
+    // [0 z y c|...] cycler
+    //
+    // [z y x w ...] spacer          n = 3
+    // [z y x c|...] cycler
+    //
+    // [0 0 0|z y x w v ...] spacer  n = 4
+    // [0 0 0 z;y x w c|...] cycler
     
     
     ////// Static Inner Classes //////
