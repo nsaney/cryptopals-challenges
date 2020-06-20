@@ -50,7 +50,7 @@ public class Challenge13Test extends TestBase {
         String expectedProfileText = String.format(
             "email=%s&role=user&uid=#%s",
             expectedEmail,
-            Math.abs(expectedEmail.hashCode())
+            10
         );
         System.out.println("Actual Profile " + profileSuffix + ": " + actualProfileText);
         assertThat("Profile " + profileSuffix, actualProfileText, equalTo(expectedProfileText));

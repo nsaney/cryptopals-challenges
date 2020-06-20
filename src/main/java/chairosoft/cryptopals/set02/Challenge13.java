@@ -54,7 +54,7 @@ public class Challenge13 {
         Map<String, String> profile = new HashMap<>();
         String sanitizedEmailAddress = sanitizeKvText(emailAddress);
         profile.put("email", sanitizedEmailAddress);
-        profile.put("uid", "#" + Math.abs(sanitizedEmailAddress.hashCode()));
+        profile.put("uid", "#10");
         profile.put("role", "user");
         return formatKv(profile);
     }
@@ -98,7 +98,7 @@ public class Challenge13 {
         }
         for (int a = 0; a < 26; ++a) {
             byte b = (byte)(65 + a);
-            byte[] inputBytes =extendRepeat(singleA, 10);
+            byte[] inputBytes = extendRepeat(singleA, 10);
             inputBytes[inputBytes.length - 1] = b;
             String inputText = toUtf8(inputBytes);
             byte[] output = oracleFn.apply(inputText);
