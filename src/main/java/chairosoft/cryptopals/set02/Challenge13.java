@@ -54,7 +54,7 @@ public class Challenge13 {
         Map<String, String> profile = new HashMap<>();
         String sanitizedEmailAddress = sanitizeKvText(emailAddress);
         profile.put("email", sanitizedEmailAddress);
-        profile.put("uid", "#" + sanitizedEmailAddress.hashCode());
+        profile.put("uid", "#" + Math.abs(sanitizedEmailAddress.hashCode()));
         profile.put("role", "user");
         return formatKv(profile);
     }

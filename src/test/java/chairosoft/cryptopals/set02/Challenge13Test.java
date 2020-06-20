@@ -32,6 +32,24 @@ public class Challenge13Test extends TestBase {
         String actualReformattedKvText = Challenge13.formatKv(expectedMap);
         System.out.println("Actual Reformatted KV Map: " + actualReformattedKvText);
         assertThat("Reformatted KV Map", actualReformattedKvText, equalTo(expectedReformattedKvText));
+        // test plaintext profile routine
+        assertProfile("#1", "atless", "atless");
+        assertProfile("#2", "atta@example.com", "atta@example.com");
+        assertProfile("#3", "atta@example.com=3", "atta@example.com3");
+        assertProfile("#4", "atta@example.com&blah=4", "atta@example.comblah4");
+    }
+    
+    
+    ////// Helper Methods //////
+    public static void assertProfile(String profileSuffix, String inputEmail, String expectedEmail) throws Exception {
+        String actualProfileText = Challenge13.profileFor(inputEmail);
+        String expectedProfileText = String.format(
+            "email=%s&role=user&uid=#%s",
+            expectedEmail,
+            Math.abs(expectedEmail.hashCode())
+        );
+        System.out.println("Actual Profile " + profileSuffix + ": " + actualProfileText);
+        assertThat("Profile " + profileSuffix, actualProfileText, equalTo(expectedProfileText));
     }
     
 }
