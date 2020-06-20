@@ -88,13 +88,13 @@ public class Challenge13 {
     public static byte[] createEncryptedAdminProfile(byte[] key) throws Exception {
         OracleFunction13 oracleFn = ea -> encryptProfileFor(ea, key);
         byte[] baseline = oracleFn.apply("");
-        System.err.println(    "Baseline: " + toHex(baseline));
+        System.err.printf("Baseline: %-96s  %s\n", toHex(baseline), formatKv(decryptProfile(baseline, key)));
         byte[] singleA = fromUtf8("A");
         for (int i = 1; i < 16; ++i) {
             byte[] inputBytes = extendRepeat(singleA, i);
             String inputText = toUtf8(inputBytes);
             byte[] output = oracleFn.apply(inputText);
-            System.err.printf("Out #%3s: %-96s  %s\n", i, toHex(output), profileFor(inputText));
+            System.err.printf("Out #%3s: %-96s  %s\n", i, toHex(output), formatKv(decryptProfile(output, key)));
         }
         for (int a = 0; a < 26; ++a) {
             byte b = (byte)(65 + a);
@@ -102,7 +102,7 @@ public class Challenge13 {
             inputBytes[inputBytes.length - 1] = b;
             String inputText = toUtf8(inputBytes);
             byte[] output = oracleFn.apply(inputText);
-            System.err.printf("Out @%3s: %-96s  %s\n", b, toHex(output), profileFor(inputText));
+            System.err.printf("Out @%3s: %-96s  %s\n", b, toHex(output), formatKv(decryptProfile(output, key)));
         }
         // TODO: actually return something correct
         return baseline;
