@@ -1,10 +1,6 @@
 package chairosoft.cryptopals.set02;
 
-import chairosoft.cryptopals.set01.Challenge08;
-
 import javax.crypto.Cipher;
-import java.io.ByteArrayOutputStream;
-import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -18,7 +14,11 @@ public class Challenge13 {
     
     ////// Main Method //////
     public static void main(String... args) throws Exception {
-        //
+        byte[] key = fromUtf8(args[0]);
+        byte[] encryptedAdminProfile = createEncryptedAdminProfile(key);
+        Map<String, String> decryptedProfile = decryptProfile(encryptedAdminProfile, key);
+        String decryptedProfileText = formatKv(decryptedProfile);
+        System.out.println(decryptedProfileText);
     }
     
     
@@ -59,7 +59,60 @@ public class Challenge13 {
         return formatKv(profile);
     }
     
+    public static byte[] encryptProfileFor(String emailAddress, byte[] key) throws Exception {
+        String profileText = profileFor(emailAddress);
+        byte[] profileBytes = fromUtf8(profileText);
+        return applyCipher(
+            "AES",
+            "ECB",
+            "PKCS5Padding",
+            Cipher.ENCRYPT_MODE,
+            key,
+            profileBytes
+        );
+    }
+    
+    public static Map<String, String> decryptProfile(byte[] encryptedProfileBytes, byte[] key) throws Exception {
+        byte[] profileBytes = applyCipher(
+            "AES",
+            "ECB",
+            "PKCS5Padding",
+            Cipher.DECRYPT_MODE,
+            key,
+            encryptedProfileBytes
+        );
+        String profileText = toUtf8(profileBytes);
+        return parseKv(profileText);
+    }
+    
+    public static byte[] createEncryptedAdminProfile(byte[] key) throws Exception {
+        OracleFunction13 oracleFn = ea -> encryptProfileFor(ea, key);
+        byte[] baseline = oracleFn.apply("");
+        System.err.println(    "Baseline: " + toHex(baseline));
+        byte[] singleA = fromUtf8("A");
+        for (int i = 1; i < 16; ++i) {
+            byte[] inputBytes = extendRepeat(singleA, i);
+            String inputText = toUtf8(inputBytes);
+            byte[] output = oracleFn.apply(inputText);
+            System.err.printf("Out #%3s: %-96s  %s\n", i, toHex(output), profileFor(inputText));
+        }
+        for (int a = 0; a < 26; ++a) {
+            byte b = (byte)(65 + a);
+            byte[] inputBytes =extendRepeat(singleA, 10);
+            inputBytes[inputBytes.length - 1] = b;
+            String inputText = toUtf8(inputBytes);
+            byte[] output = oracleFn.apply(inputText);
+            System.err.printf("Out @%3s: %-96s  %s\n", b, toHex(output), profileFor(inputText));
+        }
+        // TODO: actually return something correct
+        return baseline;
+    }
+    
     
     ////// Static Inner Classes //////
+    @FunctionalInterface
+    public interface OracleFunction13 {
+        byte[] apply(String emailAddress) throws Exception;
+    }
     
 }

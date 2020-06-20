@@ -36,6 +36,11 @@ public class Challenge13Test extends TestBase {
         assertProfile("#2", "atta@example.com", "atta@example.com");
         assertProfile("#3", "atta@example.com=3", "atta@example.com3");
         assertProfile("#4", "atta@example.com&blah=4", "atta@example.comblah4");
+        // test making a role=admin profile
+        String keyText = "Yellow Submarine";
+        String expectedResultContains = "role=admin";
+        long expectedResultLineCount = 1;
+        assertResultOutputContains(expectedResultContains, expectedResultLineCount, Challenge13::main, keyText);
     }
     
     

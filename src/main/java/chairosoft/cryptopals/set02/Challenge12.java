@@ -118,6 +118,7 @@ public class Challenge12 {
     
     
     ////// Static Inner Classes //////
+    @FunctionalInterface
     public interface OracleFunction12 {
         byte[] apply(byte[] knownData) throws GeneralSecurityException;
     }
