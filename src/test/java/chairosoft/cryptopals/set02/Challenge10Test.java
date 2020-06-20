@@ -31,7 +31,7 @@ public class Challenge10Test extends TestBase {
         // test challenge data
         String expectedResultPrefix = "I'm back and I'm ringin' the bell";
         long expectedResultLineCount = 80;
-        assertResultOutput(expectedResultPrefix, expectedResultLineCount, Challenge10::main, inputFile, key, iv);
+        assertResultOutputStartsWith(expectedResultPrefix, expectedResultLineCount, Challenge10::main, inputFile, key, iv);
     }
     
 }

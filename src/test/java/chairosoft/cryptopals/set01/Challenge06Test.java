@@ -28,7 +28,7 @@ public class Challenge06Test extends TestBase {
         int keySizeMax = 40;
         String expectedResultPrefix = "[Terminator X: Bring the noise]";
         long expectedResultLineCount = 79;
-        assertResultOutput(
+        assertResultOutputStartsWith(
             expectedResultPrefix,
             expectedResultLineCount,
             Challenge06::main,

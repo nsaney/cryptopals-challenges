@@ -22,7 +22,7 @@ public class Challenge12Test extends TestBase {
         byte[] unknownBase64 = fromBase64Text(unknownBase64Text);
         String expectedResultPrefix = "[blockSize=16][ECB=true]: " + toDisplayableText(unknownBase64);
         long expectedResultLineCount = count((byte)'\n', unknownBase64) + 1;
-        assertResultOutput(expectedResultPrefix, expectedResultLineCount, Challenge12::main, unknownBase64Text, keyBase64Text);
+        assertResultOutputStartsWith(expectedResultPrefix, expectedResultLineCount, Challenge12::main, unknownBase64Text, keyBase64Text);
     }
     
 }

@@ -1,5 +1,6 @@
 package chairosoft.cryptopals;
 
+import org.hamcrest.Matcher;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
@@ -53,8 +54,30 @@ public abstract class TestBase {
         return result;
     }
     
+    public static void assertResultOutputStartsWith(
+        String expectedResultText,
+        long expectedResultLineCount,
+        MainMethod mainMethod,
+        Object... argObjects
+    )
+        throws Exception
+    {
+        assertResultOutput(startsWith(expectedResultText), expectedResultLineCount, mainMethod, argObjects);
+    }
+    
+    public static void assertResultOutputContains(
+        String expectedResultContains,
+        long expectedResultLineCount,
+        MainMethod mainMethod,
+        Object... argObjects
+    )
+        throws Exception
+    {
+        assertResultOutput(containsString(expectedResultContains), expectedResultLineCount, mainMethod, argObjects);
+    }
+    
     public static void assertResultOutput(
-        String expectedResultPrefix,
+        Matcher<String> resultMatcher,
         long expectedResultLineCount,
         MainMethod mainMethod,
         Object... argObjects
@@ -63,7 +86,7 @@ public abstract class TestBase {
     {
         byte[] actualResultBytes = getStdOut(mainMethod, argObjects);
         String actualResult = toUtf8(actualResultBytes);
-        assertThat("Result Output", actualResult, startsWith(expectedResultPrefix));
+        assertThat("Result Output", actualResult, resultMatcher);
         long actualResultLineCount = actualResult.codePoints().filter(c -> c == '\n').count();
         assertThat("Line Count", actualResultLineCount, equalTo(expectedResultLineCount));
     }

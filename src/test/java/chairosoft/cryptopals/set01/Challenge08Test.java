@@ -14,7 +14,7 @@ public class Challenge08Test extends TestBase {
         String inputFile = "src/test/resources/challenge-data/set01/08.txt";
         String expectedResultPrefix = "Line #0133: ";
         long expectedResultLineCount = 1;
-        assertResultOutput(expectedResultPrefix, expectedResultLineCount, Challenge08::main, inputFile);
+        assertResultOutputStartsWith(expectedResultPrefix, expectedResultLineCount, Challenge08::main, inputFile);
     }
     
 }

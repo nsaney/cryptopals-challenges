@@ -15,7 +15,7 @@ public class Challenge07Test extends TestBase {
         String key = "YELLOW SUBMARINE";
         String expectedResultPrefix = "I'm back and I'm ringin' the bell";
         long expectedResultLineCount = 80;
-        assertResultOutput(expectedResultPrefix, expectedResultLineCount, Challenge07::main, inputFile, key);
+        assertResultOutputStartsWith(expectedResultPrefix, expectedResultLineCount, Challenge07::main, inputFile, key);
     }
     
 }
