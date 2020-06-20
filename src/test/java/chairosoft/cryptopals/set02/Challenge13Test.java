@@ -27,6 +27,11 @@ public class Challenge13Test extends TestBase {
         Map<String, String> actualMap = Challenge13.parseKv(kvText);
         System.out.println("Actual KV Map: " + actualMap);
         assertThat("KV Map", actualMap, equalTo(expectedMap));
+        // test kv format routine
+        String expectedReformattedKvText = "baz=qux&foo=bar&zap=zazzle";
+        String actualReformattedKvText = Challenge13.formatKv(expectedMap);
+        System.out.println("Actual Reformatted KV Map: " + actualReformattedKvText);
+        assertThat("Reformatted KV Map", actualReformattedKvText, equalTo(expectedReformattedKvText));
     }
     
 }

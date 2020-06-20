@@ -7,6 +7,7 @@ import java.io.ByteArrayOutputStream;
 import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static chairosoft.cryptopals.Common.*;
 
@@ -34,6 +35,28 @@ public class Challenge13 {
             }
         }
         return result;
+    }
+    
+    public static String formatKv(Map<String, String> kvMap) {
+        return kvMap
+            .entrySet()
+            .stream()
+            .sorted(Map.Entry.comparingByKey())
+            .map(e -> sanitizeKvText(e.getKey()) + "=" + sanitizeKvText(e.getValue()))
+            .collect(Collectors.joining("&"));
+    }
+    
+    public static String sanitizeKvText(String input) {
+        return input.replaceAll("[&=]", "");
+    }
+    
+    public static String profileFor(String emailAddress) {
+        Map<String, String> profile = new HashMap<>();
+        String sanitizedEmailAddress = sanitizeKvText(emailAddress);
+        profile.put("email", sanitizedEmailAddress);
+        profile.put("uid", "#" + sanitizedEmailAddress.hashCode());
+        profile.put("role", "user");
+        return formatKv(profile);
     }
     
     
