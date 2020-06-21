@@ -1,8 +1,7 @@
 package chairosoft.cryptopals.set02;
 
 import javax.crypto.Cipher;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static chairosoft.cryptopals.Common.*;
@@ -15,7 +14,9 @@ public class Challenge13 {
     ////// Main Method //////
     public static void main(String... args) throws Exception {
         byte[] key = fromUtf8(args[0]);
-        byte[] encryptedAdminProfile = createEncryptedAdminProfile(key);
+        OracleFunction13 oracleFn = email -> encryptProfileFor(email, key);
+        DecryptFunction13 decryptFn = in -> decryptProfile(in, key);
+        byte[] encryptedAdminProfile = createEncryptedAdminProfile(oracleFn, decryptFn);
         Map<String, String> decryptedProfile = decryptProfile(encryptedAdminProfile, key);
         String decryptedProfileText = formatKv(decryptedProfile);
         System.out.println(decryptedProfileText);
@@ -30,7 +31,7 @@ public class Challenge13 {
             String[] kv = entryText.split("=", 2);
             String key = kv.length > 0 ? kv[0] : null;
             String value = kv.length > 1 ? kv[1] : "";
-            if (key != null) {
+            if (key != null && !key.isEmpty()) {
                 result.put(key, value);
             }
         }
@@ -85,27 +86,74 @@ public class Challenge13 {
         return parseKv(profileText);
     }
     
-    public static byte[] createEncryptedAdminProfile(byte[] key) throws Exception {
-        OracleFunction13 oracleFn = ea -> encryptProfileFor(ea, key);
+    public static byte[] createEncryptedAdminProfile(OracleFunction13 oracleFn, DecryptFunction13 decryptFn) throws Exception {
         byte[] baseline = oracleFn.apply("");
-        System.err.printf("Baseline: %-96s  %s\n", toHex(baseline), formatKv(decryptProfile(baseline, key)));
+        System.err.printf("Baseline: %s\n", debugText(baseline, decryptFn));
         byte[] singleA = fromUtf8("A");
-        for (int i = 1; i < 16; ++i) {
-            byte[] inputBytes = extendRepeat(singleA, i);
+        // find block size
+        int minBlockSize = 8;
+        int maxBlockSize = baseline.length;
+        byte[] previousOutput = baseline;
+        byte[] currentOutput = baseline;
+        byte[] inputBytes = singleA;
+        List<OverlapDetails> overlaps = null;
+        for (int i = 1; i <= maxBlockSize; ++i) {
+            inputBytes = extendRepeat(singleA, i);
+            String inputText = toUtf8(inputBytes);
+            currentOutput = oracleFn.apply(inputText);
+            overlaps = getOverlaps(previousOutput, currentOutput);
+            if (overlaps.stream().anyMatch(o -> o.length > minBlockSize)) {
+                break;
+            }
+            previousOutput = currentOutput;
+        }
+        if (overlaps == null || overlaps.isEmpty()) {
+            throw new IllegalStateException("Unable to determine block size for oracle.");
+        }
+        System.err.printf(
+            "Block Overlaps: %s\n%s\n%s\n",
+            overlaps,
+            debugText(previousOutput, decryptFn),
+            debugText(currentOutput, decryptFn)
+        );
+        int blockSize = overlaps.get(0).length;
+        // generate unpadded output
+        int baseSize = inputBytes.length + 1;
+        int maxSize = baseSize + blockSize;
+        byte[] firstBlock = null;
+        for (int i = baseSize; i < maxSize; ++i) {
+            inputBytes = extendRepeat(singleA, i);
             String inputText = toUtf8(inputBytes);
             byte[] output = oracleFn.apply(inputText);
-            System.err.printf("Out #%3s: %-96s  %s\n", i, toHex(output), formatKv(decryptProfile(output, key)));
+            firstBlock = Arrays.copyOf(output, blockSize);
+            try {
+                decryptFn.apply(firstBlock);
+                break;
+            }
+            catch (Exception ex) {
+                firstBlock = null;
+            }
         }
-        for (int a = 0; a < 26; ++a) {
-            byte b = (byte)(65 + a);
-            byte[] inputBytes = extendRepeat(singleA, 10);
-            inputBytes[inputBytes.length - 1] = b;
-            String inputText = toUtf8(inputBytes);
-            byte[] output = oracleFn.apply(inputText);
-            System.err.printf("Out @%3s: %-96s  %s\n", b, toHex(output), formatKv(decryptProfile(output, key)));
+        if (firstBlock == null) {
+            throw new IllegalStateException("Unable to find copyable first block.");
         }
+        System.err.println("Copyable first block: " + debugText(firstBlock, decryptFn));
+        
         // TODO: actually return something correct
         return baseline;
+    }
+    
+    public static String debugText(byte[] encryptedBytes, DecryptFunction13 decryptFn) throws Exception {
+        return String.format("%s  %s", toHex(encryptedBytes), toDisplayableText(fromUtf8(formatKv(decryptFn.apply(encryptedBytes)))));
+    }
+    
+    public static void debugAllBlockSuffixes(String name, int blockSize, byte[] encryptedBytes, DecryptFunction13 decryptFn) throws Exception {
+        int blockCount = encryptedBytes.length / blockSize;
+        for (int i = 1; i <= blockCount; ++i) {
+            int suffixLength = i * blockSize;
+            byte[] suffixBytes = Arrays.copyOfRange(encryptedBytes, encryptedBytes.length - suffixLength, encryptedBytes.length);
+            System.err.printf("Last %s Blocks of %s: %s\n", i, name, debugText(suffixBytes, decryptFn));
+        }
     }
     
     
@@ -113,6 +161,11 @@ public class Challenge13 {
     @FunctionalInterface
     public interface OracleFunction13 {
         byte[] apply(String emailAddress) throws Exception;
+    }
+    
+    @FunctionalInterface
+    public interface DecryptFunction13 {
+        Map<String, String> apply(byte[] input) throws Exception;
     }
     
 }
