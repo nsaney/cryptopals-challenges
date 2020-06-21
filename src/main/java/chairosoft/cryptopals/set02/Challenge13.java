@@ -120,24 +120,21 @@ public class Challenge13 {
         // generate unpadded output
         int baseSize = inputBytes.length + 1;
         int maxSize = baseSize + blockSize;
-        byte[] firstBlock = null;
+        byte[] boundarySplitUser = null;
+        byte[] lastBlock = null;
         for (int i = baseSize; i < maxSize; ++i) {
             inputBytes = extendRepeat(singleA, i);
             String inputText = toUtf8(inputBytes);
-            byte[] output = oracleFn.apply(inputText);
-            firstBlock = Arrays.copyOf(output, blockSize);
-            try {
-                decryptFn.apply(firstBlock);
+            boundarySplitUser = oracleFn.apply(inputText);
+            lastBlock = Arrays.copyOfRange(boundarySplitUser, boundarySplitUser.length - blockSize, boundarySplitUser.length);
+            if (decryptFn.apply(lastBlock).containsKey("user")) {
                 break;
             }
-            catch (Exception ex) {
-                firstBlock = null;
-            }
         }
-        if (firstBlock == null) {
-            throw new IllegalStateException("Unable to find copyable first block.");
+        if (boundarySplitUser == null) {
+            throw new IllegalStateException("Unable to force boundary 'role=|user'.");
         }
-        System.err.println("Copyable first block: " + debugText(firstBlock, decryptFn));
+        debugAllBlockSuffixes("Boundary Split User", blockSize, boundarySplitUser, decryptFn);
         
         // TODO: actually return something correct
         return baseline;
@@ -153,6 +150,11 @@ public class Challenge13 {
             int suffixLength = i * blockSize;
             byte[] suffixBytes = Arrays.copyOfRange(encryptedBytes, encryptedBytes.length - suffixLength, encryptedBytes.length);
             System.err.printf("Last %s Blocks of %s: %s\n", i, name, debugText(suffixBytes, decryptFn));
+        }
+        if (blockCount > 2) {
+            byte[] copyFirstTwice = Arrays.copyOf(encryptedBytes, encryptedBytes.length);
+            System.arraycopy(copyFirstTwice, 0, copyFirstTwice, blockSize, blockSize);
+            System.err.printf("CopyCopy of %s     : %s\n", name, debugText(copyFirstTwice, decryptFn));
         }
     }
     
