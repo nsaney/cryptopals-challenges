@@ -1,13 +1,15 @@
 package chairosoft.cryptopals.set02;
 
+import chairosoft.cryptopals.Common;
+import chairosoft.cryptopals.Common.OverlapDetails;
 import chairosoft.cryptopals.TestBase;
 import org.junit.Test;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
+import static chairosoft.cryptopals.Common.getOverlaps;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.*;
 
 /**
  * https://cryptopals.com/sets/2/challenges/13
@@ -17,6 +19,15 @@ public class Challenge13Test extends TestBase {
     ////// Instance Methods - Tests //////
     @Test
     public void doTest() throws Exception {
+        // test overlap check
+        List<OverlapDetails> overlaps = getOverlaps(new byte[] { 0, 1, 2, 3, 4, 5 }, new byte[] { 0, 1, 0, 3, 0, 5 });
+        System.out.println("Overlaps: " + overlaps);
+        assertThat("Overlaps", overlaps, notNullValue());
+        assertThat("Overlaps", overlaps, equalTo(Arrays.asList(
+            new OverlapDetails(0, 2),
+            new OverlapDetails(3, 1),
+            new OverlapDetails(5, 1)
+        )));
         // test kv parse routine
         String kvText = "foo=bar&baz=qux&zap=zazzle";
         Map<String, String> expectedMap = new HashMap<>();

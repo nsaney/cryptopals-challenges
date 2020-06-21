@@ -242,6 +242,25 @@ public final class Common {
         return result;
     }
     
+    public static List<OverlapDetails> getOverlaps(byte[] x, byte[] y) {
+        List<OverlapDetails> result = new ArrayList<>();
+        int minLength = Math.min(x.length, y.length);
+        int currentOverlapOffset = -1;
+        for (int i = 0; i <= minLength; ++i) {
+            boolean currentMatch = i < minLength && (x[i] == y[i]);
+            if (currentMatch && currentOverlapOffset <= -1) {
+                currentOverlapOffset = i;
+            }
+            if (!currentMatch && currentOverlapOffset > -1) {
+                int currentOverlapLength = i - currentOverlapOffset;
+                OverlapDetails overlap = new OverlapDetails(currentOverlapOffset, currentOverlapLength);
+                result.add(overlap);
+                currentOverlapOffset = -1;
+            }
+        }
+        return result;
+    }
+    
     ////// Static Methods - Crypto //////
     public static byte xor(byte xVal, byte yVal) {
         return (byte)((xVal ^ yVal) & 0xff);
@@ -531,6 +550,34 @@ public final class Common {
             return f -> f.toString(keyToStringFn);
         }
         
+    }
+    
+    public static class OverlapDetails implements Comparable<OverlapDetails> {
+        public static final Comparator<OverlapDetails> COMPARATOR = Comparator
+            .comparing((OverlapDetails o) -> o.offset)
+            .thenComparing(o -> o.length);
+        public final int offset;
+        public final int length;
+        public OverlapDetails(int _offset, int _length) {
+            this.offset = _offset;
+            this.length = _length;
+        }
+        @Override
+        public int hashCode() {
+            return Objects.hash(this.offset, this.length);
+        }
+        @Override
+        public boolean equals(Object obj) {
+            return (obj instanceof OverlapDetails && this.compareTo((OverlapDetails)obj) == 0);
+        }
+        @Override
+        public int compareTo(OverlapDetails that) {
+            return COMPARATOR.compare(this, that);
+        }
+        @Override
+        public String toString() {
+            return String.format("{off=%s,len=%s}", this.offset, this.length);
+        }
     }
     
 }
