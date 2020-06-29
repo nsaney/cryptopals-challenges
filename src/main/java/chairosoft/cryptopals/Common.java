@@ -58,6 +58,11 @@ public final class Common {
         int dataLen = max - off;
         int textLen = dataLen * 2;
         StringBuilder sb = new StringBuilder(textLen);
+        toHex(sb, data, off, max);
+        return sb.toString();
+    }
+    
+    public static void toHex(StringBuilder sb, byte[] data, int off, int max) {
         for (int i = off; i < max; ++i) {
             byte valueData = data[i];
             int valueUnsigned = valueData & 0xff;
@@ -67,6 +72,29 @@ public final class Common {
             }
             sb.append(valueText);
         }
+    }
+    
+    public static String toBlockedHex(int blockSize, byte... data) {
+        return toBlockedHex(blockSize, data, 0, data.length);
+    }
+    
+    public static String toBlockedHex(int blockSize, byte[] data, int off, int len) {
+        if (blockSize < 1) {
+            return "[" + toHex(data, off, len) + "]";
+        }
+        int max = maxIndex(data, off, len);
+        int dataLen = max - off;
+        int blockCount = dataLen / blockSize;
+        int textLen = (dataLen * 2) + blockCount + 1;
+        StringBuilder sb = new StringBuilder(textLen);
+        for (int blockIndex = 0; blockIndex < blockCount; ++blockIndex) {
+            char startChar = blockIndex == 0 ? '[' : '|';
+            sb.append(startChar);
+            int blockOff = off + (blockIndex * blockSize);
+            int blockMax = blockOff + blockSize;
+            toHex(sb, data, blockOff, blockMax);
+        }
+        sb.append(']');
         return sb.toString();
     }
     
@@ -239,6 +267,28 @@ public final class Common {
             int j = i % originalLength;
             result[i] = result[j];
         }
+        return result;
+    }
+    
+    public static void copyBlocks(
+        int blockSize,
+        byte[] src,
+        int srcBlkOff,
+        byte[] dest,
+        int destBlkOff,
+        int blockCount
+    ) {
+        int srcPos = srcBlkOff * blockSize;
+        int destPos = destBlkOff * blockSize;
+        int length = blockCount * blockSize;
+        System.arraycopy(src, srcPos, dest, destPos, length);
+    }
+    
+    public static byte[] appendBlocks(int blockSize, byte[] original, byte[] src, int srcBlkOff, int blockCount) {
+        int srcPos = srcBlkOff * blockSize;
+        int appendedLength = blockCount * blockSize;
+        byte[] result = Arrays.copyOf(original, original.length + appendedLength);
+        System.arraycopy(src, srcPos, result, original.length, appendedLength);
         return result;
     }
     

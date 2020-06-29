@@ -55,7 +55,7 @@ public class Challenge13 {
         Map<String, String> profile = new HashMap<>();
         String sanitizedEmailAddress = sanitizeKvText(emailAddress);
         profile.put("email", sanitizedEmailAddress);
-        profile.put("uid", "#10");
+        profile.put("uid", "10");
         profile.put("role", "user");
         return formatKv(profile);
     }
@@ -88,7 +88,7 @@ public class Challenge13 {
     
     public static byte[] createEncryptedAdminProfile(OracleFunction13 oracleFn, DecryptFunction13 decryptFn) throws Exception {
         byte[] baseline = oracleFn.apply("");
-        System.err.printf("Baseline: %s\n", debugText(baseline, decryptFn));
+        System.err.printf("Baseline: %s\n", debugText(-1, baseline, decryptFn));
         byte[] singleA = fromUtf8("A");
         // find block size
         int minBlockSize = 8;
@@ -113,35 +113,96 @@ public class Challenge13 {
         System.err.printf(
             "Block Overlaps: %s\n%s\n%s\n",
             overlaps,
-            debugText(previousOutput, decryptFn),
-            debugText(currentOutput, decryptFn)
+            debugText(-1, previousOutput, decryptFn),
+            debugText(-1, currentOutput, decryptFn)
         );
         int blockSize = overlaps.get(0).length;
-        // generate unpadded output
+        // force boundary split '...role='|'user...'
+        System.err.println("Forcing boundary split: '...role='|'user...'");
+        String targetCurrentValue = "user";
         int baseSize = inputBytes.length + 1;
-        int maxSize = baseSize + blockSize;
-        byte[] boundarySplitUser = null;
-        byte[] lastBlock = null;
+        int maxSize = baseSize + blockSize + 1;
+        byte[] outputWithTargetSplit = null;
+        int blockSplitIndex = -1;
         for (int i = baseSize; i < maxSize; ++i) {
             inputBytes = extendRepeat(singleA, i);
             String inputText = toUtf8(inputBytes);
-            boundarySplitUser = oracleFn.apply(inputText);
-            lastBlock = Arrays.copyOfRange(boundarySplitUser, boundarySplitUser.length - blockSize, boundarySplitUser.length);
-            if (decryptFn.apply(lastBlock).containsKey("user")) {
-                break;
+            outputWithTargetSplit = oracleFn.apply(inputText);
+            int blockCount = outputWithTargetSplit.length / blockSize;
+            for (blockSplitIndex = 0; blockSplitIndex < blockCount; ++blockSplitIndex) {
+                int j = blockSplitIndex * blockSize;
+                byte[] block = Arrays.copyOfRange(outputWithTargetSplit, j, j + blockSize);
+                byte[] blockWithSuffix = appendBlocks(blockSize, block, outputWithTargetSplit, blockCount - 1, 1);
+                if (decryptFn.apply(blockWithSuffix).containsKey(targetCurrentValue)) {
+                    i = maxSize;
+                    break;
+                }
+            }
+            if (i < maxSize) {
+                outputWithTargetSplit = null;
             }
         }
-        if (boundarySplitUser == null) {
-            throw new IllegalStateException("Unable to force boundary 'role=|user'.");
+        if (outputWithTargetSplit == null || blockSplitIndex < 0) {
+            throw new IllegalStateException("Unable to force boundary: '...role='|'user...'");
         }
-        debugAllBlockSuffixes("Boundary Split User", blockSize, boundarySplitUser, decryptFn);
-        
-        // TODO: actually return something correct
-        return baseline;
+        System.err.println("Target Split at block #" + (blockSplitIndex + 1));
+        debugAllBlockSuffixes("Output With Target Split", blockSize, outputWithTargetSplit, decryptFn);
+        // force boundary split '...'|'admin...'
+        System.err.println("Forcing boundary split: '...'|'admin...'");
+        String targetReplacementValueText = "admin";
+        byte[] targetReplacementValue = fromUtf8(targetReplacementValueText);
+        baseSize = targetReplacementValue.length;
+        maxSize = baseSize + blockSize + 1;
+        byte[] blockWithReplacement = null;
+        for (int i = baseSize; i < maxSize; ++i) {
+            inputBytes = extendRepeat(singleA, i);
+            System.arraycopy(
+                targetReplacementValue,
+                0,
+                inputBytes,
+                inputBytes.length - targetReplacementValue.length,
+                targetReplacementValue.length
+            );
+            String inputText = toUtf8(inputBytes);
+            byte[] outputBytes = oracleFn.apply(inputText);
+            int blockCount = outputBytes.length / blockSize;
+            for (int replacementBlockIndex = 0; replacementBlockIndex < blockCount; ++replacementBlockIndex) {
+                int j = replacementBlockIndex * blockSize;
+                blockWithReplacement = Arrays.copyOfRange(outputBytes, j, j + blockSize);
+                byte[] blockWithSuffix = appendBlocks(blockSize, blockWithReplacement, outputBytes, blockCount - 1, 1);
+                if (decryptFn.apply(blockWithSuffix).containsKey(targetReplacementValueText)) {
+                    debugAllBlockSuffixes("With Replacement", blockSize, blockWithSuffix, decryptFn);
+                    i = maxSize;
+                    break;
+                }
+                blockWithReplacement = null;
+            }
+        }
+        if (blockWithReplacement == null) {
+            throw new IllegalStateException("Unable to force boundary: '...'|'admin...'");
+        }
+        // [admin&role=user&|uid=#10]
+        // make replacement
+        System.err.println("Combining to get result...");
+        int blockCount = outputWithTargetSplit.length / blockSize;
+        byte[] result = appendBlocks(blockSize, outputWithTargetSplit, outputWithTargetSplit, blockCount - 1, 1);
+        copyBlocks(blockSize, blockWithReplacement, 0, result, blockSplitIndex, 1);
+        System.err.printf(
+            "%10s: %s\n%10s: %s\n%10s: %s\n",
+            "owts", toBlockedHex(blockSize, outputWithTargetSplit),
+            "bwr", toBlockedHex(blockSize, blockWithReplacement),
+            "result", toBlockedHex(blockSize, result)
+        );
+        debugAllBlockSuffixes("Result", blockSize, result, decryptFn);
+        return result;
     }
     
-    public static String debugText(byte[] encryptedBytes, DecryptFunction13 decryptFn) throws Exception {
-        return String.format("%s  %s", toHex(encryptedBytes), toDisplayableText(fromUtf8(formatKv(decryptFn.apply(encryptedBytes)))));
+    public static String debugText(int blockSize, byte[] encryptedBytes, DecryptFunction13 decryptFn) throws Exception {
+        return String.format(
+            "%s  %s",
+            toBlockedHex(blockSize, encryptedBytes),
+            toDisplayableText(fromUtf8(formatKv(decryptFn.apply(encryptedBytes))))
+        );
     }
     
     public static void debugAllBlockSuffixes(String name, int blockSize, byte[] encryptedBytes, DecryptFunction13 decryptFn) throws Exception {
@@ -149,12 +210,7 @@ public class Challenge13 {
         for (int i = 1; i <= blockCount; ++i) {
             int suffixLength = i * blockSize;
             byte[] suffixBytes = Arrays.copyOfRange(encryptedBytes, encryptedBytes.length - suffixLength, encryptedBytes.length);
-            System.err.printf("Last %s Blocks of %s: %s\n", i, name, debugText(suffixBytes, decryptFn));
-        }
-        if (blockCount > 2) {
-            byte[] copyFirstTwice = Arrays.copyOf(encryptedBytes, encryptedBytes.length);
-            System.arraycopy(copyFirstTwice, 0, copyFirstTwice, blockSize, blockSize);
-            System.err.printf("CopyCopy of %s     : %s\n", name, debugText(copyFirstTwice, decryptFn));
+            System.err.printf("Last %s Blocks of %s: %s\n", i, name, debugText(blockSize, suffixBytes, decryptFn));
         }
     }
     

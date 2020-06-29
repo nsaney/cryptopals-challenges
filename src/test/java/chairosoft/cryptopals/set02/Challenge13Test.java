@@ -59,9 +59,8 @@ public class Challenge13Test extends TestBase {
     public static void assertProfile(String profileSuffix, String inputEmail, String expectedEmail) throws Exception {
         String actualProfileText = Challenge13.profileFor(inputEmail);
         String expectedProfileText = String.format(
-            "email=%s&role=user&uid=#%s",
-            expectedEmail,
-            10
+            "email=%s&role=user&uid=10",
+            expectedEmail
         );
         System.out.println("Actual Profile " + profileSuffix + ": " + actualProfileText);
         assertThat("Profile " + profileSuffix, actualProfileText, equalTo(expectedProfileText));
