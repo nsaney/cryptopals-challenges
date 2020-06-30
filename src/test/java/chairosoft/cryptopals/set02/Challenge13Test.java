@@ -1,6 +1,5 @@
 package chairosoft.cryptopals.set02;
 
-import chairosoft.cryptopals.Common;
 import chairosoft.cryptopals.Common.OverlapDetails;
 import chairosoft.cryptopals.TestBase;
 import org.junit.Test;

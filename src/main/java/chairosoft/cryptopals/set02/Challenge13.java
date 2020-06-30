@@ -117,6 +117,23 @@ public class Challenge13 {
             debugText(-1, currentOutput, decryptFn)
         );
         int blockSize = overlaps.get(0).length;
+        // get padding output block
+        System.err.println("Finding padding output block.");
+        previousOutput = baseline;
+        byte[] paddingOutputBlock = null;
+        byte[] single0x10 = fromHex("10");
+        for (int i = 1; i <= blockSize; ++i) {
+            inputBytes = extendRepeat(single0x10, i);
+            String inputText = toUtf8(inputBytes);
+            currentOutput = oracleFn.apply(inputText);
+            if (previousOutput.length < currentOutput.length) {
+                paddingOutputBlock = Arrays.copyOfRange(currentOutput, currentOutput.length - blockSize, currentOutput.length);
+                break;
+            }
+        }
+        if (paddingOutputBlock == null) {
+            throw new IllegalStateException("Unable to create padding output block.");
+        }
         // force boundary split '...role='|'user...'
         System.err.println("Forcing boundary split: '...role='|'user...'");
         String targetCurrentValue = "user";
@@ -132,8 +149,8 @@ public class Challenge13 {
             for (blockSplitIndex = 0; blockSplitIndex < blockCount; ++blockSplitIndex) {
                 int j = blockSplitIndex * blockSize;
                 byte[] block = Arrays.copyOfRange(outputWithTargetSplit, j, j + blockSize);
-                byte[] blockWithSuffix = appendBlocks(blockSize, block, outputWithTargetSplit, blockCount - 1, 1);
-                if (decryptFn.apply(blockWithSuffix).containsKey(targetCurrentValue)) {
+                byte[] blockWithPadding = withPaddingBlock(block, paddingOutputBlock);
+                if (decryptFn.apply(blockWithPadding).containsKey(targetCurrentValue)) {
                     i = maxSize;
                     break;
                 }
@@ -146,7 +163,7 @@ public class Challenge13 {
             throw new IllegalStateException("Unable to force boundary: '...role='|'user...'");
         }
         System.err.println("Target Split at block #" + (blockSplitIndex + 1));
-        debugAllBlockSuffixes("Output With Target Split", blockSize, outputWithTargetSplit, decryptFn);
+        debugAllBlocks("Output With Target Split", outputWithTargetSplit, paddingOutputBlock, decryptFn);
         // force boundary split '...'|'admin...'
         System.err.println("Forcing boundary split: '...'|'admin...'");
         String targetReplacementValueText = "admin";
@@ -169,9 +186,9 @@ public class Challenge13 {
             for (int replacementBlockIndex = 0; replacementBlockIndex < blockCount; ++replacementBlockIndex) {
                 int j = replacementBlockIndex * blockSize;
                 blockWithReplacement = Arrays.copyOfRange(outputBytes, j, j + blockSize);
-                byte[] blockWithSuffix = appendBlocks(blockSize, blockWithReplacement, outputBytes, blockCount - 1, 1);
-                if (decryptFn.apply(blockWithSuffix).containsKey(targetReplacementValueText)) {
-                    debugAllBlockSuffixes("With Replacement", blockSize, blockWithSuffix, decryptFn);
+                byte[] blockWithPadding = withPaddingBlock(blockWithReplacement, paddingOutputBlock);
+                if (decryptFn.apply(blockWithPadding).containsKey(targetReplacementValueText)) {
+                    debugAllBlocks("With Replacement", blockWithPadding, paddingOutputBlock, decryptFn);
                     i = maxSize;
                     break;
                 }
@@ -189,12 +206,16 @@ public class Challenge13 {
         copyBlocks(blockSize, blockWithReplacement, 0, result, blockSplitIndex, 1);
         System.err.printf(
             "%10s: %s\n%10s: %s\n%10s: %s\n",
-            "owts", toBlockedHex(blockSize, outputWithTargetSplit),
-            "bwr", toBlockedHex(blockSize, blockWithReplacement),
-            "result", toBlockedHex(blockSize, result)
+            "owts", debugText(blockSize, outputWithTargetSplit, decryptFn),
+            "bwr", debugText(blockSize, withPaddingBlock(blockWithReplacement, paddingOutputBlock), decryptFn),
+            "result", debugText(blockSize, result, decryptFn)
         );
-        debugAllBlockSuffixes("Result", blockSize, result, decryptFn);
+        debugAllBlocks("Result", result, paddingOutputBlock, decryptFn);
         return result;
+    }
+    
+    public static byte[] withPaddingBlock(byte[] original, byte[] paddingBlock) {
+        return appendBlocks(paddingBlock.length, original, paddingBlock, 0, 1);
     }
     
     public static String debugText(int blockSize, byte[] encryptedBytes, DecryptFunction13 decryptFn) throws Exception {
@@ -205,12 +226,14 @@ public class Challenge13 {
         );
     }
     
-    public static void debugAllBlockSuffixes(String name, int blockSize, byte[] encryptedBytes, DecryptFunction13 decryptFn) throws Exception {
+    public static void debugAllBlocks(String name, byte[] encryptedBytes, byte[] paddingOutputBlock, DecryptFunction13 decryptFn) throws Exception {
+        int blockSize = paddingOutputBlock.length;
         int blockCount = encryptedBytes.length / blockSize;
-        for (int i = 1; i <= blockCount; ++i) {
-            int suffixLength = i * blockSize;
-            byte[] suffixBytes = Arrays.copyOfRange(encryptedBytes, encryptedBytes.length - suffixLength, encryptedBytes.length);
-            System.err.printf("Last %s Blocks of %s: %s\n", i, name, debugText(blockSize, suffixBytes, decryptFn));
+        for (int i = 0; i < blockCount; ++i) {
+            int offset = i * blockSize;
+            byte[] block = Arrays.copyOfRange(encryptedBytes, offset, offset + blockSize);
+            byte[] blockWithPadding = (i + 1 == blockCount ? block : withPaddingBlock(block, paddingOutputBlock));
+            System.err.printf("Block #%s of %s: %s\n", (i + 1), name, debugText(blockSize, blockWithPadding, decryptFn));
         }
     }
     
