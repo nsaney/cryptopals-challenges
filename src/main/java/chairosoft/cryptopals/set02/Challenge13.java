@@ -165,9 +165,17 @@ public class Challenge13 {
         System.err.println("Target Split at block #" + (blockSplitIndex + 1));
         debugAllBlocks("Output With Target Split", outputWithTargetSplit, paddingOutputBlock, decryptFn);
         // force boundary split '...'|'admin...'
+        // NOTE line 1 of 2: solution (using padding to get a new end block) taken from the blog entry below.
+        // NOTE line 2 of 2: https://cedricvanrompay.gitlab.io/cryptopals/challenges/09-to-13.html#The-attack
         System.err.println("Forcing boundary split: '...'|'admin...'");
-        String targetReplacementValueText = "admin";
-        byte[] targetReplacementValue = fromUtf8(targetReplacementValueText);
+        String targetReplacementValueBaseText = "admin";
+        byte[] targetReplacementValueBase = fromUtf8(targetReplacementValueBaseText);
+        byte[] targetReplacementValue = Arrays.copyOf(targetReplacementValueBase, blockSize);
+        byte paddingByte = (byte)(blockSize - targetReplacementValueBase.length);
+        for (int i = targetReplacementValueBase.length; i < targetReplacementValue.length; ++i) {
+            targetReplacementValue[i] = paddingByte;
+        }
+        String targetReplacementValueText = toUtf8(targetReplacementValue);
         baseSize = targetReplacementValue.length;
         maxSize = baseSize + blockSize + 1;
         byte[] blockWithReplacement = null;
@@ -201,13 +209,15 @@ public class Challenge13 {
         // [admin&role=user&|uid=#10]
         // make replacement
         System.err.println("Combining to get result...");
-        int blockCount = outputWithTargetSplit.length / blockSize;
-        byte[] result = appendBlocks(blockSize, outputWithTargetSplit, outputWithTargetSplit, blockCount - 1, 1);
-        copyBlocks(blockSize, blockWithReplacement, 0, result, blockSplitIndex, 1);
+        int replacementBlockCount = blockWithReplacement.length / blockSize;
+        int resultBlockCount = blockSplitIndex + replacementBlockCount;
+        byte[] result = new byte[blockSize * resultBlockCount];
+        copyBlocks(blockSize, outputWithTargetSplit, 0, result, 0, blockSplitIndex);
+        copyBlocks(blockSize, blockWithReplacement, 0, result, blockSplitIndex, replacementBlockCount);
         System.err.printf(
-            "%10s: %s\n%10s: %s\n%10s: %s\n",
+            "%-10s: %s\n%-10s: %s\n%-10s: %s\n",
             "owts", debugText(blockSize, outputWithTargetSplit, decryptFn),
-            "bwr", debugText(blockSize, withPaddingBlock(blockWithReplacement, paddingOutputBlock), decryptFn),
+            "bwr", debugText(blockSize, blockWithReplacement, decryptFn),
             "result", debugText(blockSize, result, decryptFn)
         );
         debugAllBlocks("Result", result, paddingOutputBlock, decryptFn);
@@ -219,9 +229,16 @@ public class Challenge13 {
     }
     
     public static String debugText(int blockSize, byte[] encryptedBytes, DecryptFunction13 decryptFn) throws Exception {
+        return debugText(blockSize, encryptedBytes, decryptFn, false);
+    }
+    
+    public static String debugText(int blockSize, byte[] encryptedBytes, DecryptFunction13 decryptFn, boolean extraBlockSpace) throws Exception {
+        int extraSpaceSize = extraBlockSpace ? ((2 * blockSize) + 1) : 0;
+        String extraSpace = extraBlockSpace ? String.format("%" + extraSpaceSize + "s", "") : "";
         return String.format(
-            "%s  %s",
+            "%s%s  %s",
             toBlockedHex(blockSize, encryptedBytes),
+            extraSpace,
             toDisplayableText(fromUtf8(formatKv(decryptFn.apply(encryptedBytes))))
         );
     }
@@ -232,8 +249,9 @@ public class Challenge13 {
         for (int i = 0; i < blockCount; ++i) {
             int offset = i * blockSize;
             byte[] block = Arrays.copyOfRange(encryptedBytes, offset, offset + blockSize);
-            byte[] blockWithPadding = (i + 1 == blockCount ? block : withPaddingBlock(block, paddingOutputBlock));
-            System.err.printf("Block #%s of %s: %s\n", (i + 1), name, debugText(blockSize, blockWithPadding, decryptFn));
+            boolean isLast = (i + 1 == blockCount);
+            byte[] blockWithPadding = (isLast ? block : withPaddingBlock(block, paddingOutputBlock));
+            System.err.printf("Block #%s of %s: %s\n", (i + 1), name, debugText(blockSize, blockWithPadding, decryptFn, isLast));
         }
     }
     

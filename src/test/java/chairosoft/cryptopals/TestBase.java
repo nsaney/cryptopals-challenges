@@ -1,11 +1,14 @@
 package chairosoft.cryptopals;
 
+import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.util.function.Predicate;
 
 import static chairosoft.cryptopals.Common.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -31,6 +34,26 @@ public abstract class TestBase {
         void doMain(String... args) throws Exception;
     }
     
+    public static class NestedMatcher<T> extends TypeSafeMatcher<T> {
+        //// Instance Fields ////
+        public final Predicate<T> matchFn;
+        public final String descriptionText;
+        //// Constructors ////
+        public NestedMatcher(Predicate<T> _matchFn, String _descriptionText) {
+            this.matchFn = _matchFn;
+            this.descriptionText = _descriptionText;
+        }
+        //// Instance Methods ////
+        @Override
+        protected boolean matchesSafely(T actualValue) {
+            return this.matchFn.test(actualValue);
+        }
+        @Override
+        public void describeTo(Description description) {
+            description.appendText(this.descriptionText);
+        }
+    }
+    
     
     ////// Static Methods //////
     public static byte[] getStdOut(MainMethod mainMethod, Object... argObjects) throws Exception {
@@ -52,6 +75,10 @@ public abstract class TestBase {
             System.out.println();
         }
         return result;
+    }
+    
+    public static <T> NestedMatcher<T> nestedMatcher(String description, Predicate<T> matchFn) {
+        return new NestedMatcher<>(matchFn, description);
     }
     
     public static void assertResultOutputStartsWith(

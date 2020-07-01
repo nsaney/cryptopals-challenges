@@ -1,14 +1,19 @@
 package chairosoft.cryptopals.set02;
 
-import chairosoft.cryptopals.Common.OverlapDetails;
+import chairosoft.cryptopals.Common.*;
 import chairosoft.cryptopals.TestBase;
+import org.hamcrest.Matcher;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import static chairosoft.cryptopals.Common.getOverlaps;
+import static chairosoft.cryptopals.Common.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
 
 /**
  * https://cryptopals.com/sets/2/challenges/13
@@ -47,11 +52,18 @@ public class Challenge13Test extends TestBase {
         assertProfile("#3", "atta@example.com=3", "atta@example.com3");
         assertProfile("#4", "atta@example.com&blah=4", "atta@example.comblah4");
         // test making a role=admin profile
-        String expectedResultContains = "role=admin";
         byte[] key = randomBytes(16);
         String keyText = toHex(key);
+        Matcher<String> expectedResultMatcher = nestedMatcher(
+            "a serialized map with entry {role=admin}",
+            text -> {
+                String trimmed = text.trim();
+                Map<String, String> serialized = Challenge13.parseKv(trimmed);
+                return "admin".equals(serialized.get("role"));
+            }
+        );
         long expectedResultLineCount = 1;
-        assertResultOutputContains(expectedResultContains, expectedResultLineCount, Challenge13::main, keyText);
+        assertResultOutput(expectedResultMatcher, expectedResultLineCount, Challenge13::main, keyText);
     }
     
     
