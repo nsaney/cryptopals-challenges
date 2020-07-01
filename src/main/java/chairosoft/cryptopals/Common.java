@@ -94,6 +94,17 @@ public final class Common {
             int blockMax = blockOff + blockSize;
             toHex(sb, data, blockOff, blockMax);
         }
+        int remainderLen = dataLen % blockSize;
+        if (remainderLen > 0) {
+            char remainderChar = blockCount == 0 ? '[' : '|';
+            sb.append(remainderChar);
+            int remainderOff = off + (blockCount * blockSize);
+            toHex(sb, data, remainderOff, max);
+            int paddingLen = blockSize - remainderLen;
+            for (int i = 0; i < paddingLen; ++i) {
+                sb.append("<>");
+            }
+        }
         sb.append(']');
         return sb.toString();
     }
