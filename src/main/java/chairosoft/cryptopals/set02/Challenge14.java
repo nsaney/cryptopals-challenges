@@ -40,22 +40,28 @@ public class Challenge14 {
         // 01: block size
         int firstBlockBarrier = Challenge12.countBytesUntilNewBlock(oracleFn, 0);
         int blockSize = Challenge12.countBytesUntilNewBlock(oracleFn, firstBlockBarrier);
-        System.err.println("firstBlockBarrier: " + firstBlockBarrier);
         // 02: detect ecb
         byte[] repeaterBlock = randomBytes(blockSize);
-        byte[] doubledBlocks = extendRepeat(repeaterBlock, blockSize * 3);
-        byte[] encryptedDataFromDoubledBlocks = oracleFn.apply(doubledBlocks);
-        boolean isEcb = Challenge08.hasRepeatBlocks(encryptedDataFromDoubledBlocks, blockSize);
+        byte[] tripledBlocks = extendRepeat(repeaterBlock, blockSize * 3);
+        byte[] encryptedDataFromTripledBlocks = oracleFn.apply(tripledBlocks);
+        boolean isEcb = Challenge08.hasRepeatBlocks(encryptedDataFromTripledBlocks, blockSize);
+        // 02.b: detect prefix size
+        int prefixSize = 0;
+        if (isEcb) {
+            //
+        }
         // 03, 04, 05, 06: spacer and cycler
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         byte[] encryptedBaseline = oracleFn.apply(new byte[0]);
-        int lastBlockGap = firstBlockBarrier - 1;
-        int targetSize = encryptedBaseline.length - lastBlockGap;
+        int lastBlockPadding = firstBlockBarrier - 1;
+        int targetSize = encryptedBaseline.length - prefixSize - lastBlockPadding;
         while (baos.size() < targetSize) {
             byte b = breakAndGetNextByte(oracleFn, blockSize, baos.toByteArray());
             baos.write(b);
         }
         byte[] result = baos.toByteArray();
+        System.err.println("lastBlockPadding: " + lastBlockPadding);
+        System.err.println("result.length:    " + result.length);
         return new DecryptionDetails12(
             blockSize,
             isEcb,
