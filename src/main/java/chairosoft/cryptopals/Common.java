@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.security.*;
 import java.util.*;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public final class Common {
@@ -206,6 +207,10 @@ public final class Common {
             sb.append("]");
         }
         return sb.toString();
+    }
+    
+    public static String escapingNewlines(String text) {
+        return text.replaceAll(Pattern.quote("\n"), "\\n");
     }
     
     public static int blockDecompositionSize(int totalSize, int blockCount, int blockIndex) {

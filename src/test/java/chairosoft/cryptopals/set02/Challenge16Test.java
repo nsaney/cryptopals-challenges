@@ -40,7 +40,7 @@ public class Challenge16Test extends TestBase {
         assertThat("isAdmin #03", isAdmin03, equalTo(true));
         // test breaking of CBC
         String expectedResultContains = "isAdmin = true";
-        long expectedResultLineCount = 1;
+        long expectedResultLineCount = 2;
         assertResultOutputContains(expectedResultContains, expectedResultLineCount, Challenge16::main, key, iv);
     }
     
