@@ -13,7 +13,7 @@ public class Challenge13 {
     
     ////// Main Method //////
     public static void main(String... args) throws Exception {
-        byte[] key = fromHex(args[0]);
+        byte[] key = fromBase64Text(args[0]);
         OracleFunction13 oracleFn = email -> encryptProfileFor(email, key);
         DecryptFunction13 decryptFn = in -> decryptProfile(in, key);
         byte[] encryptedAdminProfile = createEncryptedAdminProfile(oracleFn, decryptFn);

@@ -53,7 +53,6 @@ public class Challenge13Test extends TestBase {
         assertProfile("#4", "atta@example.com&blah=4", "atta@example.comblah4");
         // test making a role=admin profile
         byte[] key = randomBytes(16);
-        String keyText = toHex(key);
         Matcher<String> expectedResultMatcher = nestedMatcher(
             "a serialized map with entry {role=admin}",
             text -> {
@@ -63,7 +62,7 @@ public class Challenge13Test extends TestBase {
             }
         );
         long expectedResultLineCount = 1;
-        assertResultOutput(expectedResultMatcher, expectedResultLineCount, Challenge13::main, keyText);
+        assertResultOutput(expectedResultMatcher, expectedResultLineCount, Challenge13::main, key);
     }
     
     

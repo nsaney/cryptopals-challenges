@@ -18,11 +18,10 @@ public class Challenge12Test extends TestBase {
                                  + "dXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUg"
                                  + "YnkK";
         byte[] key = Challenge11.generateRandomAesKey();
-        String keyBase64Text = toBase64Text(key);
         byte[] unknownBase64 = fromBase64Text(unknownBase64Text);
         String expectedResultPrefix = "[blockSize=16][ECB=true]: " + toDisplayableText(unknownBase64);
         long expectedResultLineCount = count((byte)'\n', unknownBase64) + 1;
-        assertResultOutputStartsWith(expectedResultPrefix, expectedResultLineCount, Challenge12::main, unknownBase64Text, keyBase64Text);
+        assertResultOutputStartsWith(expectedResultPrefix, expectedResultLineCount, Challenge12::main, unknownBase64, key);
     }
     
 }

@@ -19,21 +19,19 @@ public class Challenge14Test extends TestBase {
                                  + "YnkK";
         int prefixSize = THREAD_LOCAL_RANDOM.get().nextInt(31) + 17;
         byte[] prefix = randomBytes(prefixSize);
-        String prefixBase64Text = toBase64Text(prefix);
         byte[] key = Challenge11.generateRandomAesKey();
-        String keyBase64Text = toBase64Text(key);
-        byte[] unknownBase64 = fromBase64Text(unknownBase64Text);
-        System.err.println("prefix.length:        " + prefix.length);
-        System.err.println("unknownBase64.length: " + unknownBase64.length);
-        String expectedResultPrefix = "[blockSize=16][ECB=true]: " + toDisplayableText(unknownBase64);
-        long expectedResultLineCount = count((byte)'\n', unknownBase64) + 1;
+        byte[] unknown = fromBase64Text(unknownBase64Text);
+        System.err.println("prefix.length:  " + prefix.length);
+        System.err.println("unknown.length: " + unknown.length);
+        String expectedResultPrefix = "[blockSize=16][ECB=true]: " + toDisplayableText(unknown);
+        long expectedResultLineCount = count((byte)'\n', unknown) + 1;
         assertResultOutputStartsWith(
             expectedResultPrefix,
             expectedResultLineCount,
             Challenge14::main,
-            prefixBase64Text,
-            unknownBase64Text,
-            keyBase64Text
+            prefix,
+            unknown,
+            key
         );
     }
     
