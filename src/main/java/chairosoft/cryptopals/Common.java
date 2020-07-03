@@ -32,7 +32,7 @@ public final class Common {
         return text.getBytes(COMMON_CHARSET);
     }
     
-    public static String toUtf8(byte[] data) {
+    public static String toUtf8(byte... data) {
         return new String(data, COMMON_CHARSET);
     }
     
@@ -118,7 +118,7 @@ public final class Common {
         return useMime ? Base64.getMimeDecoder() : Base64.getDecoder();
     }
     
-    public static byte[] fromBase64(byte[] base64Data) {
+    public static byte[] fromBase64(byte... base64Data) {
         return fromBase64(base64Data, false);
     }
     
@@ -134,11 +134,11 @@ public final class Common {
         return decoder(useMime).decode(base64Text);
     }
     
-    public static byte[] toBase64(byte[] data) {
+    public static byte[] toBase64(byte... data) {
         return Base64.getEncoder().encode(data);
     }
     
-    public static String toBase64Text(byte[] data) {
+    public static String toBase64Text(byte... data) {
         return Base64.getEncoder().encodeToString(data);
     }
     
