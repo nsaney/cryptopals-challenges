@@ -1,12 +1,12 @@
 package chairosoft.cryptopals.set02;
 
-import chairosoft.cryptopals.set01.Challenge08;
 import chairosoft.cryptopals.set02.Challenge12.DecryptionDetails12;
 import chairosoft.cryptopals.set02.Challenge12.OracleFunction12;
 
 import javax.crypto.Cipher;
 import java.io.ByteArrayOutputStream;
 import java.security.GeneralSecurityException;
+import java.util.Arrays;
 
 import static chairosoft.cryptopals.Common.*;
 
@@ -44,22 +44,36 @@ public class Challenge14 {
         byte[] repeaterBlock = randomBytes(blockSize);
         byte[] tripledBlocks = extendRepeat(repeaterBlock, blockSize * 3);
         byte[] encryptedDataFromTripledBlocks = oracleFn.apply(tripledBlocks);
-        boolean isEcb = Challenge08.hasRepeatBlocks(encryptedDataFromTripledBlocks, blockSize);
+        boolean isEcb = null != getRepeatBlockIndices(blockSize, encryptedDataFromTripledBlocks);
         // 02.b: detect prefix size
+        byte[] encryptedBaseline = oracleFn.apply(new byte[0]);
         int prefixSize = 0;
         if (isEcb) {
-            //
+            byte[] doubledBlocks = Arrays.copyOf(tripledBlocks, blockSize * 2);
+            for (int i = 0; i < encryptedBaseline.length; ++i) {
+                byte[] spacer = new byte[i];
+                byte[] doubleAfterSpacer = appendBlocks(blockSize, spacer, doubledBlocks, 0, 2);
+                byte[] encryptedDataFromSpacedDouble = oracleFn.apply(doubleAfterSpacer);
+                int[] repeatBlockIndices = getRepeatBlockIndices(blockSize, encryptedDataFromSpacedDouble);
+                if (repeatBlockIndices != null && repeatBlockIndices.length == 2) {
+                    // [ppppp|ppsss|ddddd|ddddd]
+                    int spacerLen = spacer.length;
+                    int repeatOff = repeatBlockIndices[0];
+                    prefixSize = repeatOff - spacerLen;
+                    break;
+                }
+            }
         }
         // 03, 04, 05, 06: spacer and cycler
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        byte[] encryptedBaseline = oracleFn.apply(new byte[0]);
         int lastBlockPadding = firstBlockBarrier - 1;
         int targetSize = encryptedBaseline.length - prefixSize - lastBlockPadding;
         while (baos.size() < targetSize) {
-            byte b = breakAndGetNextByte(oracleFn, blockSize, baos.toByteArray());
+            byte b = breakAndGetNextByte(oracleFn, blockSize, prefixSize, baos.toByteArray());
             baos.write(b);
         }
         byte[] result = baos.toByteArray();
+        System.err.println("prefixSize:       " + prefixSize);
         System.err.println("lastBlockPadding: " + lastBlockPadding);
         System.err.println("result.length:    " + result.length);
         return new DecryptionDetails12(
@@ -69,11 +83,25 @@ public class Challenge14 {
         );
     }
     
-    public static byte breakAndGetNextByte(OracleFunction12 oracleFn, int blockSize, byte[] known) throws Exception {
+    public static int[] getRepeatBlockIndices(int blockSize, byte[] data) {
+        int remainder = data.length % blockSize;
+        int maxLen = data.length - remainder;
+        for (int i = 0; i < maxLen; i += blockSize) {
+            for (int j = i + blockSize; j < maxLen; j += blockSize) {
+                if (areEqual(data, i, j, blockSize)) {
+                    return new int[] { i, j };
+                }
+            }
+        }
+        return null;
+    }
+    
+    public static byte breakAndGetNextByte(OracleFunction12 oracleFn, int blockSize, int prefixSize, byte[] known) throws Exception {
         int n = known.length;
-        int matchBlockIndex = n / blockSize;
+        int pn = n + prefixSize;
+        int matchBlockIndex = pn / blockSize;
         int matchBlockOffset = blockSize * matchBlockIndex;
-        int spacerOverlap = (n + 1) % blockSize;
+        int spacerOverlap = (pn + 1) % blockSize;
         int spacerSize = (blockSize - spacerOverlap) % blockSize;
         int cyclerSize = spacerSize + n + 1;
         byte[] spacer = new byte[spacerSize];
@@ -88,7 +116,14 @@ public class Challenge14 {
                 return b;
             }
         }
-        return 0;
+        throw new IllegalStateException(String.format(
+            "No matches after known[%s] = %s; prefixSize = %s ; spacerSize = %s ; cycler = %s",
+            n,
+            prefixSize,
+            toDisplayableText(known),
+            spacerSize,
+            toDisplayableText(cycler)
+        ));
     }
     
 }
