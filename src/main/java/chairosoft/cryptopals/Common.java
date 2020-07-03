@@ -334,6 +334,19 @@ public final class Common {
         return result;
     }
     
+    public static int getInitialOverlappingBlockCount(int blockSize, byte[] x, byte[] y) {
+        int len = Math.min(x.length, y.length);
+        int count = 0;
+        for (int i = 0; i < len; i += blockSize) {
+            if (!areEqual(x, i, y, i, blockSize)) {
+                break;
+            }
+            ++count;
+        }
+        return count;
+    }
+    
+    
     ////// Static Methods - Crypto //////
     public static byte xor(byte xVal, byte yVal) {
         return (byte)((xVal ^ yVal) & 0xff);
