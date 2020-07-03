@@ -303,6 +303,13 @@ public final class Common {
         return result;
     }
     
+    public static byte[] concatenate(byte[] x, byte... y) {
+        int resultLen = x.length + y.length;
+        byte[] result = Arrays.copyOf(x, resultLen);
+        System.arraycopy(y, 0, result, x.length, y.length);
+        return result;
+    }
+    
     public static List<OverlapDetails> getOverlaps(byte[] x, byte[] y) {
         List<OverlapDetails> result = new ArrayList<>();
         int minLength = Math.min(x.length, y.length);
@@ -406,6 +413,53 @@ public final class Common {
             return out;
         }
     }
+    
+    public static byte[] withoutPkcs7Padding(int blockSize, byte... data) throws GeneralSecurityException {
+        if (data == null || data.length == 0) {
+            return data;
+        }
+        int paddingLen = getPkcs7PaddingLength(blockSize, data);
+        if (paddingLen < 1) {
+            int blockCount = data.length / blockSize;
+            byte[] lastBlock = new byte[blockSize];
+            copyBlocks(blockSize, data, blockCount - 1, lastBlock, 0, 1);
+            throw new BadPaddingException(String.format(
+                "Invalid PKCS #7 padding for data: [...|%s].",
+                toDisplayableText(lastBlock)
+            ));
+        }
+        int newLen = data.length - paddingLen;
+        return Arrays.copyOf(data, newLen);
+    }
+    
+    public static int getPkcs7PaddingLength(int blockSize, byte... data) throws GeneralSecurityException {
+        // see com.sun.crypto.provider.PKCS5Padding#unpad
+        if (data == null || data.length == 0) {
+            return 0;
+        }
+        int dataLenModBlockSize = data.length % blockSize;
+        if (dataLenModBlockSize != 0) {
+            throw new IllegalBlockSizeException(String.format(
+                "Expected data with block size of %s but modulo value was %s.",
+                blockSize,
+                dataLenModBlockSize
+            ));
+        }
+        int lastIndex = data.length - 1;
+        byte lastByte = data[lastIndex];
+        if (lastByte < 1 || lastByte > blockSize) {
+            return -1;
+        }
+        for (byte i = 1; i < lastByte; ++i) {
+            int index = lastIndex - i;
+            byte b = data[index];
+            if (b != lastByte) {
+                return -1;
+            }
+        }
+        return lastByte;
+    }
+    
     
     ////// Static Methods - Random //////
     public static byte[] randomBytes(int length) {

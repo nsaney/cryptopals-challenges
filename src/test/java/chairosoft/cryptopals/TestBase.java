@@ -63,7 +63,16 @@ public abstract class TestBase {
         try (PrintStream tempOut = new PrintStream(baos)) {
             String[] args = new String[argObjects.length];
             for (int i = 0; i < args.length; ++i) {
-                args[i] = argObjects[i] == null ? null : String.valueOf(argObjects[i]);
+                Object obj = argObjects[i];
+                if (obj == null) {
+                    args[i] = null;
+                }
+                else if (obj instanceof byte[]) {
+                    args[i] = toBase64Text((byte[])obj);
+                }
+                else {
+                    args[i] = String.valueOf(obj);
+                }
             }
             System.setOut(tempOut);
             mainMethod.doMain(args);
@@ -116,6 +125,40 @@ public abstract class TestBase {
         assertThat("Result Output", actualResult, resultMatcher);
         long actualResultLineCount = actualResult.codePoints().filter(c -> c == '\n').count();
         assertThat("Line Count", actualResultLineCount, equalTo(expectedResultLineCount));
+    }
+    
+    public static void assertResultError(
+        Class<? extends Throwable> errorType,
+        MainMethod mainMethod,
+        Object... argObjects
+    )
+        throws Exception
+    {
+        assertResultError(errorType, null, mainMethod, argObjects);
+    }
+    
+    public static void assertResultError(
+        Class<? extends Throwable> errorType,
+        Matcher<String> errorMessageMatcher,
+        MainMethod mainMethod,
+        Object... argObjects
+    )
+        throws Exception
+    {
+        Throwable error = null;
+        try {
+            getStdOut(mainMethod, argObjects);
+        }
+        catch (Throwable ex) {
+            error = ex;
+        }
+        assertThat("Error", error, notNullValue());
+        System.err.printf("%s: %s\n", error.getClass(), error.getMessage());
+        assertThat("Error Type", error.getClass(), typeCompatibleWith(errorType));
+        if (errorMessageMatcher != null) {
+            String errorMessage = error.getMessage();
+            assertThat("Error Message", errorMessage, errorMessageMatcher);
+        }
     }
     
 }
