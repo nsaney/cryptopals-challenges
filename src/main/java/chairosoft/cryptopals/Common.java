@@ -231,6 +231,26 @@ public final class Common {
         return sum;
     }
     
+    public static int firstIndexOf(byte c, byte... bytes) {
+        for (int i = 0; i < bytes.length; ++i) {
+            byte b = bytes[i];
+            if (b == c) {
+                return i;
+            }
+        }
+        return -1;
+    }
+    
+    public static int lastIndexOf(byte c, byte... bytes) {
+        for (int i = bytes.length; i --> 0; ) {
+            byte b = bytes[i];
+            if (b == c) {
+                return i;
+            }
+        }
+        return -1;
+    }
+    
     public static int hammingDistance(byte[] x, byte[] y) {
         boolean isXShorter = x.length < y.length;
         int minLength = isXShorter ? x.length : y.length;

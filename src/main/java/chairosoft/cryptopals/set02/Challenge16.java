@@ -100,13 +100,20 @@ public class Challenge16 {
             throw new IllegalStateException("Unable to determine data offset.");
         }
         System.err.println("data offset: " + dataOffset);
+        // manufacture encrypted content
         int gapToNextBlock = dataOffset % blockSize;
-        byte[] sourceData = fromUtf8("XadminYtrue");
+        byte[] sourceData = fromUtf8("XadminYtrueZ");
         byte[] sourceInput = new byte[gapToNextBlock + (2 * blockSize)];
         System.arraycopy(sourceData, 0, sourceInput, gapToNextBlock + blockSize, sourceData.length);
         byte[] sourceOutput = encryptFn.encrypt(sourceInput);
         byte[] targetOutput = Arrays.copyOf(sourceOutput, sourceOutput.length);
-        // TODO: mod output
+        int modOffset = dataOffset + gapToNextBlock;
+        int modIndex01 = modOffset + firstIndexOf((byte)'X', sourceData);
+        targetOutput[modIndex01] ^= 'X' ^ ';';
+        int modIndex02 = modOffset + firstIndexOf((byte)'Y', sourceData);
+        targetOutput[modIndex02] ^= 'Y' ^ '=';
+        int modIndex03 = modOffset + firstIndexOf((byte)'Z', sourceData);
+        targetOutput[modIndex03] ^= 'Z' ^ ';';
         return targetOutput;
     }
     
