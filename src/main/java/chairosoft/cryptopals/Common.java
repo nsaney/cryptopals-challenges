@@ -8,6 +8,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.*;
+import java.security.spec.AlgorithmParameterSpec;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -411,12 +412,27 @@ public final class Common {
     )
         throws GeneralSecurityException
     {
+        return applyCipher(algorithmName, algorithmMode, paddingScheme, cipherMode, key, null, data);
+    }
+    
+    public static byte[] applyCipher(
+        String algorithmName,
+        String algorithmMode,
+        String paddingScheme,
+        int cipherMode,
+        byte[] key,
+        AlgorithmParameterSpec params,
+        byte[] data
+    )
+        throws GeneralSecurityException
+    {
         return applyCipher(
             algorithmName,
             algorithmMode,
             paddingScheme,
             cipherMode,
             key,
+            params,
             data,
             0,
             null,
@@ -431,6 +447,7 @@ public final class Common {
         String paddingScheme,
         int cipherMode,
         byte[] key,
+        AlgorithmParameterSpec params,
         byte[] data,
         int dataOff,
         byte[] out,
@@ -442,7 +459,7 @@ public final class Common {
         String transformation = algorithmName + "/" + algorithmMode + "/" + paddingScheme;
         Cipher cipher = Cipher.getInstance(transformation);
         SecretKey secretKey = new SecretKeySpec(key, algorithmName);
-        cipher.init(cipherMode, secretKey);
+        cipher.init(cipherMode, secretKey, params);
         if (out == null) {
             return cipher.doFinal(data, dataOff, len);
         }
