@@ -479,7 +479,8 @@ public final class Common {
             byte[] lastBlock = new byte[blockSize];
             copyBlocks(blockSize, data, blockCount - 1, lastBlock, 0, 1);
             throw new BadPaddingException(String.format(
-                "Invalid PKCS #7 padding for data: [...|%s].",
+                "Invalid PKCS #7 padding for data: [%s%s].",
+                data.length == blockSize ? "" : "...|",
                 toDisplayableText(lastBlock)
             ));
         }
