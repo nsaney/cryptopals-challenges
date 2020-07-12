@@ -4,6 +4,7 @@ import chairosoft.cryptopals.TestBase;
 import org.junit.Test;
 
 import static chairosoft.cryptopals.Common.*;
+import static org.hamcrest.Matchers.equalTo;
 
 /**
  * https://cryptopals.com/sets/3/challenges/17
@@ -12,6 +13,7 @@ public class Challenge17Test extends TestBase {
     
     ////// Constants //////
     private static final byte[][] CLEAR_TEXT_OPTIONS = {
+        fromBase64Text("dGVzdCB3aXRoIHBhZD0x"),
         fromBase64Text("MDAwMDAwTm93IHRoYXQgdGhlIHBhcnR5IGlzIGp1bXBpbmc="),
         fromBase64Text("MDAwMDAxV2l0aCB0aGUgYmFzcyBraWNrZWQgaW4gYW5kIHRoZSBWZWdhJ3MgYXJlIHB1bXBpbic="),
         fromBase64Text("MDAwMDAyUXVpY2sgdG8gdGhlIHBvaW50LCB0byB0aGUgcG9pbnQsIG5vIGZha2luZw=="),
@@ -31,9 +33,9 @@ public class Challenge17Test extends TestBase {
         byte[] key = randomBytes(blockSize);
         byte[] iv = randomBytes(blockSize);
         for (byte[] data : CLEAR_TEXT_OPTIONS) {
-            String expectedOutput = toDisplayableText(data);
+            String expectedOutput = toDisplayableText(data) + "\n";
             byte[] input = Challenge17.encrypt(data, key, iv);
-            assertResultOutputContains(expectedOutput, 1, Challenge17::main, key, iv, input);
+            assertResultOutput(equalTo(expectedOutput), 1, Challenge17::main, key, iv, input);
         }
     }
     

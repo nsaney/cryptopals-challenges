@@ -4,6 +4,8 @@ import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -23,6 +25,8 @@ public final class Common {
     ////// Constants //////
     public static final Charset COMMON_CHARSET = StandardCharsets.UTF_8;
     public static final ThreadLocal<Random> THREAD_LOCAL_RANDOM = ThreadLocal.withInitial(Random::new);
+    public static final boolean IS_DEBUG = Boolean.parseBoolean(System.getProperty("debug", "false"));
+    public static final PrintStream debug = IS_DEBUG ? System.err : NullPrintStream.INSTANCE;
     
     
     ////// Static Methods - Data Formats and Display //////
@@ -763,6 +767,21 @@ public final class Common {
         public String toString() {
             return String.format("{off=%s,len=%s}", this.offset, this.length);
         }
+    }
+    
+    public static class NullOutputStream extends OutputStream {
+        public static final NullOutputStream INSTANCE = new NullOutputStream();
+        private NullOutputStream() { }
+        @Override public void write(int b) {}
+        @Override public void write(byte[] buffer) {}
+        @Override public void write(byte[] buffer, int off, int len) {}
+    }
+    
+    public static class NullPrintStream extends PrintStream {
+        public static final NullPrintStream INSTANCE = new NullPrintStream();
+        private NullPrintStream() { super(NullOutputStream.INSTANCE); }
+        @Override public PrintStream format(String format, Object... args) { return this; }
+        @Override public PrintStream format(Locale l, String format, Object... args) { return this; }
     }
     
 }
