@@ -469,6 +469,20 @@ public final class Common {
         }
     }
     
+    public static byte[] withPkcs7Padding(int blockSize, byte... data) {
+        if (data == null || data.length == 0) {
+            return data;
+        }
+        int paddingGap = data.length % blockSize;
+        byte paddingLen = (byte)(blockSize - paddingGap);
+        int updatedLen = data.length + paddingLen;
+        byte[] result = Arrays.copyOf(data, updatedLen);
+        for (int i = data.length; i < updatedLen; ++i) {
+            result[i] = paddingLen;
+        }
+        return result;
+    }
+    
     public static byte[] withoutPkcs7Padding(int blockSize, byte... data) throws GeneralSecurityException {
         if (data == null || data.length == 0) {
             return data;
