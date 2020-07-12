@@ -74,7 +74,7 @@ public class Challenge17 {
         byte[] mod = new byte[modLength];
         debug.println("IV        : " + toBlockedHex(blockSize, iv));
         debug.println("Encrypted : " + toBlockedHex(blockSize, encrypted));
-        for (int i = encrypted.length, n = 0; (i -= blockSize) >= 0; ++n) {
+        for (int i = 0; i < encrypted.length; i += blockSize) {
             if (i > 0) {
                 System.arraycopy(encrypted, i - blockSize, mod, 0, modLength);
             }
@@ -85,10 +85,12 @@ public class Challenge17 {
             debug.printf("Mod[%2s]   : %s\n", i / blockSize, toBlockedHex(blockSize, mod));
             for (byte padByte = 1; padByte <= blockSize; ++padByte) {
                 int j = blockSize - padByte;
+                // set up remainder of mod block for target padding
                 for (int k = j + 1; k < blockSize; ++k) {
                     mod[k] ^= padByte - 1;
                     mod[k] ^= padByte;
                 }
+                // try original value last in case it refers to a block with already-valid padding
                 byte orig = mod[j];
                 for (int x = 256; x --> 0; ) {
                     mod[j] = (byte)x;
