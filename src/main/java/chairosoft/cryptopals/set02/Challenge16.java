@@ -17,7 +17,7 @@ public class Challenge16 {
     public static void main(String... args) throws Exception {
         byte[] key = fromBase64Text(args[0]);
         byte[] iv = fromBase64Text(args[1]);
-        EncryptFunction16 encryptFn = data -> encryptUserData(data, key, iv);
+        EncryptFunction encryptFn = data -> encryptUserData(data, key, iv);
         byte[] encryptedAdminProfile = createEncryptedAdminProfile(encryptFn);
         byte[] profile = Challenge10.decryptAesCbc(encryptedAdminProfile, key, iv);
         boolean isAdmin = isAdminProfile(encryptedAdminProfile, key, iv);
@@ -75,7 +75,7 @@ public class Challenge16 {
         return false;
     }
     
-    public static byte[] createEncryptedAdminProfile(EncryptFunction16 encryptFn) throws Exception {
+    public static byte[] createEncryptedAdminProfile(EncryptFunction encryptFn) throws Exception {
         // get block size
         Challenge12.OracleFunction12 oracleFn = encryptFn::encrypt;
         int firstBlockBarrier = Challenge12.countBytesUntilNewBlock(oracleFn, 0);
@@ -115,18 +115,6 @@ public class Challenge16 {
         int modIndex03 = modOffset + firstIndexOf((byte)'Z', sourceData);
         targetOutput[modIndex03] ^= 'Z' ^ ';';
         return targetOutput;
-    }
-    
-    
-    ////// Static Inner Classes //////
-    @FunctionalInterface
-    public interface EncryptFunction16 {
-        byte[] encrypt(byte[] data) throws GeneralSecurityException;
-    }
-    
-    @FunctionalInterface
-    public interface DecryptFunction16 {
-        byte[] decrypt(byte[] data) throws GeneralSecurityException;
     }
     
 }

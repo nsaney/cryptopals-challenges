@@ -2,10 +2,9 @@ package chairosoft.cryptopals;
 
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -473,6 +472,78 @@ public final class Common {
         }
     }
     
+    public static byte[] applyCounterCipher(
+        String algorithmName,
+        String algorithmMode,
+        String paddingScheme,
+        byte[] key,
+        AlgorithmParameterSpec params,
+        byte[] nonce,
+        ByteOrder counterByteOrder,
+        byte[] input
+    )
+        throws GeneralSecurityException
+    {
+        return applyCounterCipher(
+            algorithmName,
+            algorithmMode,
+            paddingScheme,
+            key,
+            params,
+            nonce,
+            counterByteOrder,
+            input,
+            0,
+            null,
+            -1,
+            input.length
+        );
+    }
+    
+    public static byte[] applyCounterCipher(
+        String algorithmName,
+        String algorithmMode,
+        String paddingScheme,
+        byte[] key,
+        AlgorithmParameterSpec params,
+        byte[] nonce,
+        ByteOrder counterByteOrder,
+        byte[] input,
+        int inputOff,
+        byte[] out,
+        int outOff,
+        int len
+    )
+        throws GeneralSecurityException
+    {
+        EncryptFunction encryptFn = ctrData -> applyCipher(
+            algorithmName,
+            algorithmMode,
+            paddingScheme,
+            Cipher.ENCRYPT_MODE,
+            key,
+            params,
+            ctrData
+        );
+        KeyStream keyStream = new CounterKeyStream(encryptFn, nonce, counterByteOrder);
+        byte[] result = out == null ? new byte[len] : out;
+        int resultOff = out == null ? 0 : outOff;
+        try {
+            for (int i = inputOff, j = resultOff, n = 0; n < len; ++n, ++j, ++i) {
+                byte currentData = input[i];
+                byte currentKey = keyStream.read();
+                result[j] = xor(currentData, currentKey);
+            }
+        }
+        catch (GeneralSecurityException gsx) {
+            throw gsx;
+        }
+        catch (Exception ex) {
+            throw new GeneralSecurityException(ex);
+        }
+        return result;
+    }
+    
     public static byte[] withPkcs7Padding(int blockSize, byte... data) {
         if (data == null || data.length == 0) {
             return data;
@@ -559,8 +630,17 @@ public final class Common {
         }
     }
     
-    
     ////// Static Inner Classes //////
+    @FunctionalInterface
+    public interface EncryptFunction {
+        byte[] encrypt(byte[] data) throws GeneralSecurityException;
+    }
+    
+    @FunctionalInterface
+    public interface DecryptFunction {
+        byte[] decrypt(byte[] data) throws GeneralSecurityException;
+    }
+    
     public static abstract class CipherResult<T, Ex extends Exception> {
         
         //// Instance Fields ////
@@ -647,6 +727,61 @@ public final class Common {
                 this.key.paddingScheme,
                 toDisplayableText(this.key.key)
             );
+        }
+        
+    }
+    
+    public static abstract class KeyStream {
+        
+        //// Instance Fields ////
+        private final EncryptFunction encryptFn;
+        protected final byte[] nonce;
+        private byte[] streamBuffer = null;
+        private int streamIndex = -1;
+        
+        //// Constructors ////
+        public KeyStream(EncryptFunction _encryptFn, byte[] _nonce) {
+            this.encryptFn = _encryptFn;
+            this.nonce = _nonce.clone();
+        }
+        
+        //// Instance Methods - Abstract ////
+        protected abstract byte[] getNextInput() throws Exception;
+        
+        //// Instance Methods - Concrete ////
+        public byte read() throws Exception {
+            if (this.streamBuffer == null || this.streamIndex < 0 || this.streamIndex >= this.streamBuffer.length) {
+                byte[] input = this.getNextInput();
+                this.streamBuffer = this.encryptFn.encrypt(input);
+                this.streamIndex = 0;
+            }
+            byte result = this.streamBuffer[this.streamIndex];
+            ++this.streamIndex;
+            return result;
+        }
+        
+    }
+    
+    public static class CounterKeyStream extends KeyStream {
+        
+        //// Instance Fields ////
+        private final ByteBuffer byteBuffer = ByteBuffer.allocate(Long.BYTES);
+        private long counter = 0;
+        
+        //// Constructor ////
+        public CounterKeyStream(EncryptFunction _encryptFn, byte[] _nonce, ByteOrder _byteOrder) {
+            super(_encryptFn, _nonce);
+            this.byteBuffer.order(_byteOrder);
+        }
+        
+        //// Instance Methods ////
+        @Override
+        protected byte[] getNextInput() throws Exception {
+            this.byteBuffer.clear();
+            this.byteBuffer.putLong(this.counter);
+            ++this.counter;
+            byte[] counterBytes = this.byteBuffer.array();
+            return concatenate(this.nonce, counterBytes);
         }
         
     }
