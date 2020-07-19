@@ -26,6 +26,7 @@ public final class Common {
     public static final ThreadLocal<Random> THREAD_LOCAL_RANDOM = ThreadLocal.withInitial(Random::new);
     public static final boolean IS_DEBUG = Boolean.parseBoolean(System.getProperty("debug", "false"));
     public static final PrintStream debug = IS_DEBUG ? System.err : NullPrintStream.INSTANCE;
+    public static final String VALUE_OF_NULL = String.valueOf((Object)null);
     
     
     ////// Static Methods - Data Formats and Display //////
@@ -168,10 +169,12 @@ public final class Common {
     }
     
     public static String toDisplayableText(byte... data) {
+        if (data == null) { return VALUE_OF_NULL; }
         return toDisplayableText(data, 0, data.length);
     }
     
     public static String toDisplayableText(byte[] data, int off, int len) {
+        if (data == null) { return VALUE_OF_NULL; }
         int max = maxIndex(data, off, len);
         StringBuilder sb = new StringBuilder(max);
         boolean inSpecialMode = false;
@@ -377,7 +380,8 @@ public final class Common {
     }
     
     public static byte[] xor(byte[] x, byte[] y) {
-        return xor(x, 0, y, 0, null, -1, x.length);
+        int len = Math.min(x.length, y.length);
+        return xor(x, 0, y, 0, null, -1, len);
     }
     
     public static byte[] xor(byte[] x, int xOff, byte[] y, int yOff, byte[] out, int outOff, int len) {
