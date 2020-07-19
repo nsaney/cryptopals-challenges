@@ -20,10 +20,13 @@ public class Challenge19Test extends TestBase {
         byte[] nonce = new byte[8];
         boolean littleEndianBlockCount = true;
         File inputsFile = new File("src/test/resources/challenge-data/set03/19--inputs.txt");
-        String expectedResultText = "__unknown__";
+        String expectedFirstLine = "  1  i have met them at close of day";
         long expectedResultLineCount = 40;
-        assertResultOutputStartsWith(
-            expectedResultText,
+        assertResultOutput(
+            nestedMatcher(
+                String.format("A string starting with, case-insensitive, \"%s\"", expectedFirstLine),
+                x -> x != null && x.toLowerCase().startsWith(expectedFirstLine.toLowerCase())
+            ),
             expectedResultLineCount,
             Challenge19::main,
             key,

@@ -1,11 +1,13 @@
 package chairosoft.cryptopals.set03;
 
+import chairosoft.cryptopals.set01.Challenge03;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.nio.ByteOrder;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static chairosoft.cryptopals.Common.*;
 
@@ -32,7 +34,7 @@ public class Challenge19 {
         byte[][] decryptedItems = breakFixedNonceCtr(encryptedItems);
         for (int i = 0; i < decryptedItems.length; ++i) {
             byte[] decrypted = decryptedItems[i];
-            System.out.printf("%2s ==>> %s\n", (i + 1), escapingNewlines(toDisplayableText(decrypted)));
+            System.out.printf("%3s  %s\n", (i + 1), escapingNewlines(toDisplayableText(decrypted)));
         }
     }
     
@@ -68,51 +70,55 @@ public class Challenge19 {
                 }
             }
             byte[] candidates = baos.toByteArray();
+            sortCandidates(candidates, crossSection);
             keyByteCandidates[i] = candidates;
+            keyStream[i] = candidates.length > 0 ? candidates[0] : 0;
             int currentCandidateCount = candidates.length;
             if (currentCandidateCount > maxCandidateCount) { maxCandidateCount = currentCandidateCount; }
         }
         // DEBUG
-        System.err.println("Key Candidates:");
+        debug.println("Key Candidates:");
         Byte[][] candidateSlices = new Byte[maxCandidateCount][];
         for (int n = 0; n < maxCandidateCount; ++n) {
-            System.err.printf("[#%3s] |", n);
+            debug.printf("[#%3s] |", n);
             Byte[] candidateSlice = getFullCrossSection(keyByteCandidates, n);
             candidateSlices[n] = candidateSlice;
             for (Byte candidate : candidateSlice) {
                 if (candidate == null) {
-                    System.err.print("  ");
+                    debug.print("  ");
                 }
                 else {
-                    System.err.printf("%02x", candidate);
+                    debug.printf("%02x", candidate);
                 }
-                System.err.print("|");
+                debug.print("|");
             }
-            System.err.println();
+            debug.println();
         }
-        int debugLinesPerOutput = Math.min(maxCandidateCount, 10);
-        for (byte[] encryptedItem : encryptedItems) {
-            System.err.println("================================================================");
+        int debugLinesPerOutput = Math.min(maxCandidateCount, 5);
+        for (int k = 0; k < encryptedItems.length; ++k) {
+            byte[] encryptedItem = encryptedItems[k];
+            debug.println("================================================================");
+            debug.printf("Line #%2s:\n", (k + 1));
             for (int n = 0; n < debugLinesPerOutput; ++n) {
-                System.err.printf("[#%3s] |", n);
+                debug.printf("[#%3s] |", n);
                 Byte[] candidateSlice = candidateSlices[n];
                 for (int i = 0; i < encryptedItem.length; ++i) {
                     Byte candidate = candidateSlice[i];
                     if (candidate == null) {
-                        System.err.print('#');
+                        debug.print('#');
                     }
                     else {
                         byte c = encryptedItem[i];
                         byte debugResult = xor(c, candidate);
                         if (debugResult == (byte)'\n') {
-                            System.err.print('_');
+                            debug.print('_');
                         }
                         else {
-                            System.err.print(toDisplayableText(debugResult));
+                            debug.print(toDisplayableText(debugResult));
                         }
                     }
                 }
-                System.err.println();
+                debug.println();
             }
         }
         return keyStream;
@@ -151,6 +157,7 @@ public class Challenge19 {
     
     public static boolean isExpectedChar(byte code) {
         return isDisplayableChar(code)
+            && !('0' <= code && code <= '9')
             && code != '~'
             && code != '`'
             && code != '#'
@@ -168,6 +175,35 @@ public class Challenge19 {
             && code != '{'
             && code != '}'
             ;
+    }
+    
+    public static void sortCandidates(byte[] candidates, byte[] crossSection) throws Exception {
+        List<Challenge03.SingleCharXorCipherResult> cipherResults = new ArrayList<>(candidates.length);
+        for (byte candidate : candidates) {
+            Challenge03.SingleCharXorCipherResult cipherResult = new Challenge03.SingleCharXorCipherResult(crossSection, candidate);
+            cipherResults.add(cipherResult);
+        }
+        Map<Byte, FrequencyTable<Byte>> frequencyTablesByKey = cipherResults
+            .stream()
+            .collect(Collectors.toMap(r -> r.key, CipherResult::getFrequencyTable));
+        cipherResults.sort(
+            Comparator.comparing(
+                (Challenge03.SingleCharXorCipherResult r) -> frequencyTablesByKey.get(r.key).getFrequency((byte)' ')
+            ).thenComparing(
+                r -> frequencyTablesByKey.get(r.key).getFrequency((byte)'e')
+            ).thenComparing(
+                r -> frequencyTablesByKey.get(r.key).getFrequency((byte)'E')
+            ).thenComparing(
+                r -> frequencyTablesByKey.get(r.key).getFrequency((byte)'t')
+            ).thenComparing(
+                r -> frequencyTablesByKey.get(r.key).getFrequency((byte)'T')
+            ).reversed()
+        );
+        for (int i = 0; i < candidates.length; ++i) {
+            Challenge03.SingleCharXorCipherResult cipherResult = cipherResults.get(i);
+            byte key = cipherResult.key;
+            candidates[i] = key;
+        }
     }
     
 }
