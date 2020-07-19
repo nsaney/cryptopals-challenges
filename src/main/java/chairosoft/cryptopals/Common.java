@@ -15,6 +15,8 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
+
 public final class Common {
     
     ////// Constructor //////
@@ -157,7 +159,7 @@ public final class Common {
     public static List<byte[]> readFileLinesHex(String fileName) throws IOException {
         File dataFile = new File(fileName);
         List<String> hexLines = Files.readAllLines(dataFile.toPath());
-        return hexLines.stream().map(Common::fromHex).collect(Collectors.toList());
+        return hexLines.stream().map(Common::fromHex).collect(toList());
     }
     
     public static boolean isDisplayableChar(int code) {
@@ -876,6 +878,29 @@ public final class Common {
         
         public Function<Frequency<T>, String> frequencyToStringFn(Function<T, String> keyToStringFn) {
             return f -> f.toString(keyToStringFn);
+        }
+        
+        //// Static Methods ////
+        @SafeVarargs
+        public static <R, T> List<R> sortedViaTable(
+            Collection<R> items,
+            Function<R, FrequencyTable<T>> tableFn,
+            boolean increasingFrequency,
+            T... sortableEntries
+        ) {
+            if (sortableEntries == null || sortableEntries.length < 2) {
+                return new ArrayList<>(items);
+            }
+            Map<R, FrequencyTable<T>> tableMap = items.stream().collect(Collectors.toMap(r -> r, tableFn));
+            Comparator<R> comparator = Comparator.comparing(r -> tableMap.get(r).getFrequency(sortableEntries[0]));
+            for (int i = 1; i < sortableEntries.length; ++i) {
+                int index = i;
+                comparator = comparator.thenComparing(r -> tableMap.get(r).getFrequency(sortableEntries[index]));
+            }
+            if (!increasingFrequency) {
+                comparator = comparator.reversed();
+            }
+            return items.stream().sorted(comparator).collect(toList());
         }
         
     }

@@ -121,6 +121,7 @@ public class Challenge19 {
                 debug.println();
             }
         }
+        debug.println("================================================================");
         return keyStream;
     }
     
@@ -178,30 +179,24 @@ public class Challenge19 {
     }
     
     public static void sortCandidates(byte[] candidates, byte[] crossSection) throws Exception {
-        List<Challenge03.SingleCharXorCipherResult> cipherResults = new ArrayList<>(candidates.length);
+        List<Byte> unsortedCandidateList = new ArrayList<>(candidates.length);
         for (byte candidate : candidates) {
-            Challenge03.SingleCharXorCipherResult cipherResult = new Challenge03.SingleCharXorCipherResult(crossSection, candidate);
-            cipherResults.add(cipherResult);
+            unsortedCandidateList.add(candidate);
         }
-        Map<Byte, FrequencyTable<Byte>> frequencyTablesByKey = cipherResults
-            .stream()
-            .collect(Collectors.toMap(r -> r.key, CipherResult::getFrequencyTable));
-        cipherResults.sort(
-            Comparator.comparing(
-                (Challenge03.SingleCharXorCipherResult r) -> frequencyTablesByKey.get(r.key).getFrequency((byte)' ')
-            ).thenComparing(
-                r -> frequencyTablesByKey.get(r.key).getFrequency((byte)'e')
-            ).thenComparing(
-                r -> frequencyTablesByKey.get(r.key).getFrequency((byte)'E')
-            ).thenComparing(
-                r -> frequencyTablesByKey.get(r.key).getFrequency((byte)'t')
-            ).thenComparing(
-                r -> frequencyTablesByKey.get(r.key).getFrequency((byte)'T')
-            ).reversed()
+        List<Byte> sortedCandidateList = FrequencyTable.sortedViaTable(
+            unsortedCandidateList,
+            key -> new Challenge03.SingleCharXorCipherResult(crossSection, key).getFrequencyTable(),
+            false,
+            (byte)' ',
+            (byte)'e', (byte)'E',
+            (byte)'t', (byte)'T',
+            (byte)'a', (byte)'A',
+            (byte)'o', (byte)'O',
+            (byte)'i', (byte)'I',
+            (byte)'n', (byte)'N'
         );
         for (int i = 0; i < candidates.length; ++i) {
-            Challenge03.SingleCharXorCipherResult cipherResult = cipherResults.get(i);
-            byte key = cipherResult.key;
+            byte key = sortedCandidateList.get(i);
             candidates[i] = key;
         }
     }
