@@ -652,6 +652,7 @@ public final class Common {
         //// Instance Fields ////
         public final T key;
         public final byte[] result;
+        private FrequencyTable<Byte> frequencyTable = null;
         
         //// Constructor ////
         public CipherResult(byte[] input, T _key) throws Ex {
@@ -672,11 +673,13 @@ public final class Common {
         }
         
         public FrequencyTable<Byte> getFrequencyTable() {
-            FrequencyTable<Byte> frequencyTable = new FrequencyTable<>();
-            for (byte b : this.result) {
-                frequencyTable.incrementFrequency(b);
+            if (this.frequencyTable == null) {
+                this.frequencyTable = new FrequencyTable<>();
+                for (byte b : this.result) {
+                    frequencyTable.incrementFrequency(b);
+                }
             }
-            return frequencyTable;
+            return this.frequencyTable;
         }
         
     }
