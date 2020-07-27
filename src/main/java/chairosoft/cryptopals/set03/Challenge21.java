@@ -84,7 +84,7 @@ public class Challenge21 {
             this.n = _recurrenceDegree;
             this.m = _middleWord;
             this.r = _lowMaskSize;
-            this.a = _twistMatrixCoefficientBits;
+            this.a = _twistMatrixCoefficientBits & this.wordMask;
             this.u = _temperingShiftU;
             this.d = _temperingMaskD & this.wordMask;
             this.s = _temperingShiftS;
@@ -92,7 +92,7 @@ public class Challenge21 {
             this.t = _temperingShiftT;
             this.c = _temperingMaskC & this.wordMask;
             this.ell = _temperingShiftL;
-            this.f = _seedInitMultiplier;
+            this.f = _seedInitMultiplier & this.wordMask;
             this.MT = new long[this.n];
             this.index = this.n + 1;
             this.loMask = (1L << this.r) - 1;
@@ -137,10 +137,6 @@ public class Challenge21 {
             y = y ^ ((y << t) & c);
             y = y ^ (y >> ell);
             y &= wordMask;
-            if (y < 0) {
-                y += 1;
-                y += wordMask;
-            }
             return y;
         }
         protected void twist() {

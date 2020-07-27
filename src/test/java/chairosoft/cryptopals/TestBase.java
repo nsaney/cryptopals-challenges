@@ -5,9 +5,12 @@ import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.runners.model.MultipleFailureException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Predicate;
 
 import static chairosoft.cryptopals.Common.*;
@@ -139,14 +142,29 @@ public abstract class TestBase {
         String[] expectedResultLines = expectedResult.split("\\n");
         String[] actualResultLines = actualResult.split("\\n");
         assertThat("Line Count", actualResultLines.length, equalTo(expectedResultLines.length));
+        List<Throwable> assertionErrors = new ArrayList<>();
         for (int i = 0; i < expectedResultLines.length; ++i) {
             String expectedLine = expectedResultLines[i];
             String actualLine = actualResultLines[i];
-            assertThat(
-                String.format("Line %s", i + 1),
-                actualLine,
-                equalTo(expectedLine)
-            );
+            try {
+                assertThat(
+                    String.format("Line %s", i + 1),
+                    actualLine,
+                    equalTo(expectedLine)
+                );
+            }
+            catch (AssertionError ex) {
+                assertionErrors.add(ex);
+            }
+        }
+        try {
+            MultipleFailureException.assertEmpty(assertionErrors);
+        }
+        catch (Exception ex) {
+            throw ex;
+        }
+        catch (Throwable th) {
+            throw new Exception(th);
         }
     }
     
