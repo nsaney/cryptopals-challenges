@@ -127,6 +127,29 @@ public abstract class TestBase {
         assertThat("Line Count", actualResultLineCount, equalTo(expectedResultLineCount));
     }
     
+    public static void assertResultOutputEquals(
+        String expectedResult,
+        MainMethod mainMethod,
+        Object... argObjects
+    )
+        throws Exception
+    {
+        byte[] actualResultBytes = getStdOut(mainMethod, argObjects);
+        String actualResult = toUtf8(actualResultBytes);
+        String[] expectedResultLines = expectedResult.split("\\n");
+        String[] actualResultLines = actualResult.split("\\n");
+        assertThat("Line Count", actualResultLines.length, equalTo(expectedResultLines.length));
+        for (int i = 0; i < expectedResultLines.length; ++i) {
+            String expectedLine = expectedResultLines[i];
+            String actualLine = actualResultLines[i];
+            assertThat(
+                String.format("Line %s", i + 1),
+                actualLine,
+                equalTo(expectedLine)
+            );
+        }
+    }
+    
     public static void assertResultError(
         Class<? extends Throwable> errorType,
         MainMethod mainMethod,
