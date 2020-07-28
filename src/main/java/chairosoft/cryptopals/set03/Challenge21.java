@@ -184,4 +184,5 @@ public class Challenge21 {
             this.setSeed(seed);
         }
     }
+    
 }

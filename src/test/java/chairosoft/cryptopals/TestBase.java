@@ -160,11 +160,11 @@ public abstract class TestBase {
         try {
             MultipleFailureException.assertEmpty(assertionErrors);
         }
-        catch (Exception ex) {
+        catch (Error | Exception ex) {
             throw ex;
         }
         catch (Throwable th) {
-            throw new Exception(th);
+            throw new Error("", th);
         }
     }
     
