@@ -155,19 +155,31 @@ public class Challenge21 {
     }
     
     public static class MT19937Random extends MersenneTwisterRandom {
+        //// Constants ////
+        public static final long DEFAULT_SEED = 5489;
+        public static final int WORD_SIZE = 32, RECURRENCE_DEGREE = 624, MIDDLE_WORD = 397, LOW_MASK_SIZE = 31;
+        public static final long TWIST_MATRIX_COEFFICIENT_BITS = 0x9908b0df;
+        public static final int TEMPERING_SHIFT_U = 11;
+        public static final long TEMPERING_MASK_D = 0xffffffff;
+        public static final int TEMPERING_SHIFT_S = 7;
+        public static final long TEMPERING_MASK_B = 0x9d2c5680;
+        public static final int TEMPERING_SHIFT_T = 15;
+        public static final long TEMPERING_MASK_C = 0xefc60000;
+        public static final int TEMPERING_SHIFT_L = 18;
+        public static final long SEED_INIT_MULTIPLIER = 1812433253;
         //// Constructors ////
         public MT19937Random() {
-            this(5489);
+            this(DEFAULT_SEED);
         }
         public MT19937Random(long seed) {
             super(
-                32, 624, 397, 31,
-                0x9908b0df,
-                11, 0xFFFFFFFF,
-                7, 0x9d2c5680,
-                15, 0xefc60000,
-                18,
-                1812433253
+                WORD_SIZE, RECURRENCE_DEGREE, MIDDLE_WORD, LOW_MASK_SIZE,
+                TWIST_MATRIX_COEFFICIENT_BITS,
+                TEMPERING_SHIFT_U, TEMPERING_MASK_D,
+                TEMPERING_SHIFT_S, TEMPERING_MASK_B,
+                TEMPERING_SHIFT_T, TEMPERING_MASK_C,
+                TEMPERING_SHIFT_L,
+                SEED_INIT_MULTIPLIER
             );
             this.setSeed(seed);
         }
