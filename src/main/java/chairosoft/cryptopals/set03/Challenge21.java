@@ -35,13 +35,13 @@ public class Challenge21 {
      */
     public static class MersenneTwisterRandom extends Random {
         //// Instance Fields ////
-        private final int w, n, m, r, s, t, u, ell;
-        private final long a, b, c, d, f;
-        private final long[] MT;
-        private int index;
-        private final long wordMask;
-        private final long loMask;
-        private final long hiMask;
+        protected final int w, n, m, r, s, t, u, ell;
+        protected final long a, b, c, d, f;
+        protected final long[] MT;
+        protected int index;
+        protected final long wordMask;
+        protected final long loMask;
+        protected final long hiMask;
         //// Constructor ////
         public MersenneTwisterRandom(
             int _wordSize,
