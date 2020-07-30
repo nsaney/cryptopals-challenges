@@ -35,13 +35,13 @@ public class Challenge21 {
      */
     public static class MersenneTwisterRandom extends Random {
         //// Instance Fields ////
-        protected final int w, n, m, r, s, t, u, ell;
-        protected final long a, b, c, d, f;
-        protected final long[] MT;
-        protected int index;
-        protected final long wordMask;
-        protected final long loMask;
-        protected final long hiMask;
+        private final int w, n, m, r, s, t, u, ell;
+        private final long a, b, c, d, f;
+        private final long wordMask;
+        private final long loMask;
+        private final long hiMask;
+        private final long[] MT;
+        private int index;
         //// Constructor ////
         public MersenneTwisterRandom(
             int _wordSize,
@@ -93,10 +93,10 @@ public class Challenge21 {
             this.c = _temperingMaskC & this.wordMask;
             this.ell = _temperingShiftL;
             this.f = _seedInitMultiplier & this.wordMask;
-            this.MT = new long[this.n];
-            this.index = this.n + 1;
             this.loMask = (1L << this.r) - 1;
             this.hiMask = (~this.loMask) & this.wordMask;
+            this.MT = new long[this.n];
+            this.index = this.n + 1;
         }
         //// Instance Methods ////
         @Override
@@ -151,6 +151,23 @@ public class Challenge21 {
                 MT[i] = MT[k] ^ xA;
             }
             index = 0;
+        }
+        protected void setState(int _index, long[] _MT) {
+            if (_index < 0) {
+                throw new IllegalArgumentException(String.format(
+                    "Given index value [%s] was less than zero.",
+                    _index
+                ));
+            }
+            if (_MT == null || _MT.length != n) {
+                throw new IllegalArgumentException(String.format(
+                    "Given state array size [%s] was invalid. Expected [%s].",
+                    _MT == null ? null : _MT.length,
+                    n
+                ));
+            }
+            index = _index;
+            System.arraycopy(_MT, 0, MT, 0, n);
         }
     }
     
