@@ -1,11 +1,12 @@
 package chairosoft.cryptopals.set03;
 
+import chairosoft.cryptopals.Common;
 import chairosoft.cryptopals.set03.Challenge21.MT19937Random;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.util.List;
-import java.util.function.LongFunction;
+import java.util.function.LongBinaryOperator;
 
 /**
  * https://cryptopals.com/sets/3/challenges/23
@@ -37,41 +38,48 @@ public class Challenge23 {
         return mt19937Random;
     }
     
+    private final static long wordMask = (1L << MT19937Random.WORD_SIZE) - 1;
+    private final static long u = MT19937Random.TEMPERING_SHIFT_U;
+    private final static long d = MT19937Random.TEMPERING_MASK_D & wordMask;
+    private final static long s = MT19937Random.TEMPERING_SHIFT_S;
+    private final static long b = MT19937Random.TEMPERING_MASK_B & wordMask;
+    private final static long t = MT19937Random.TEMPERING_SHIFT_T;
+    private final static long c = MT19937Random.TEMPERING_MASK_C & wordMask;
+    private final static long ell = MT19937Random.TEMPERING_SHIFT_L;
+    private final static LongBinaryOperator f4 = (x0, x) -> x0 ^ ((x >> ell));
+    private final static LongBinaryOperator f3 = (x0, x) -> x0 ^ ((x << t) & c);
+    private final static LongBinaryOperator f2 = (x0, x) -> x0 ^ ((x << s) & b);
+    private final static LongBinaryOperator f1 = (x0, x) -> x0 ^ ((x >> u) & d);
+    public static long applyUntilStable(LongBinaryOperator op, long x0, int maxIters) {
+        long xf = x0;
+        for (int i = 0; i < maxIters; ++i) {
+            long prev = xf;
+            xf = op.applyAsLong(x0, prev);
+            if (prev == xf) {
+                return xf;
+            }
+        }
+        throw new IllegalStateException("Did not converge.");
+    }
+    
     public static long untemperMt19973Value(long z) {
-        long wordMask = (1L << MT19937Random.WORD_SIZE) - 1;
-        long u = MT19937Random.TEMPERING_SHIFT_U;
-        long d = MT19937Random.TEMPERING_MASK_D & wordMask;
-        long s = MT19937Random.TEMPERING_SHIFT_S;
-        long b = MT19937Random.TEMPERING_MASK_B & wordMask;
-        long t = MT19937Random.TEMPERING_SHIFT_T;
-        long c = MT19937Random.TEMPERING_MASK_C & wordMask;
-        long ell = MT19937Random.TEMPERING_SHIFT_L;
-        ////y1 = y0 ^ ((y0 >> u) & d);
-        ////y2 = y1 ^ ((y1 << s) & b);
-        ////y3 = y2 ^ ((y2 << t) & c);
-        ////y  = y3 ^ (y3 >> ell);
-        long z3 = z ^ ((z ^ (z >> u)) >> u);
-        //
-        //
-        long y2 = z & wordMask;
-        long y3 = y2 ^ ((y2 << t) & c);
-        long ya = 0;
-        long yb = 0;
-        long yc = 0;
-        long yd = 0;
-        System.err.printf(
-            "y2=[%08x] ; y3=[%08x]\nya=[%08x] ; yb=[%08x] ; yc=[%08x] ; yd=[%08x]\n",
-            y2, y3,
-            ya, yb, yc, yd
-        );
-        LongFunction<String> checkFn = val -> String.format("%12s    ", val == y2 ? "=y2" : val == y3 ? "=y3" : "=..");
-        System.err.printf("%s%s%s%s\n", checkFn.apply(ya), checkFn.apply(yb), checkFn.apply(yc), checkFn.apply(yd));
-        // a  b  a&b
-        // 0  0  0
-        // 0  1  0
-        // 1  0  0
-        // 1  1  1
-        throw new UnsupportedOperationException();
+        long z4 = z & wordMask;
+        long z3 = applyUntilStable(f4, z4, 10);
+        long z2 = applyUntilStable(f3, z3, 10);
+        long z1 = applyUntilStable(f2, z2, 10);
+        long z0 = applyUntilStable(f1, z1, 10);
+        long y = z0 & wordMask;
+        if (Common.IS_DEBUG) {
+            long y1 = f1.applyAsLong(y, y);
+            long y2 = f2.applyAsLong(y1, y1);
+            long y3 = f3.applyAsLong(y2, y2);
+            long y4 = f4.applyAsLong(y3, y3);
+            if (y4 != z4) {
+                String message = String.format("Could not untemper [%08x] ; got [%08x] instead.", z4, y4);
+                throw new IllegalStateException(message);
+            }
+        }
+        return y;
     }
     
 }
