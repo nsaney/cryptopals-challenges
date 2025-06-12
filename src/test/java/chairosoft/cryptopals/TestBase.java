@@ -7,8 +7,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.runners.model.MultipleFailureException;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -18,6 +17,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 public abstract class TestBase {
+
+    ////// Constants //////
+    public static final String TEST_VALUES_DIR_PATH = "target/test-values";
+    public static final File TEST_VALUES_DIR = new File(TEST_VALUES_DIR_PATH);
+
     
     ////// Setup/Teardown Methods //////
     @BeforeClass
@@ -59,6 +63,15 @@ public abstract class TestBase {
     
     
     ////// Static Methods //////
+    public static void ensureTestValuesDir() throws IOException {
+        boolean testValuesDirExists = TEST_VALUES_DIR.exists()
+                                      && TEST_VALUES_DIR.isDirectory()
+                                      || TEST_VALUES_DIR.mkdirs();
+        if (!testValuesDirExists) {
+            throw new FileNotFoundException("Could not find or create directory: " + TEST_VALUES_DIR);
+        }
+    }
+
     public static byte[] getStdOut(MainMethod mainMethod, Object... argObjects) throws Exception {
         PrintStream originalOut = System.out;
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

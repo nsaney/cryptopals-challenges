@@ -16,13 +16,11 @@ public class Challenge23Test extends TestBase {
     ////// Instance Methods - Tests //////
     @Test
     public void doTest() throws Exception {
+        ensureTestValuesDir();
         long seed = System.currentTimeMillis();
         int count = 20;
-        File testFile = new File("target/test-values/23--inputs.txt");
-        if (!testFile.getParentFile().mkdirs()) {
-            throw new FileNotFoundException("Unable to create file: " + testFile);
-        }
         MT19937Random mt19937Random = new MT19937Random(seed);
+        File testFile = new File(TEST_VALUES_DIR, "23--inputs.txt");
         try (FileOutputStream fout = new FileOutputStream(testFile)
             ; PrintStream fps = new PrintStream(fout, true, Common.COMMON_CHARSET.name())
         ) {
